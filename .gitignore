@@ -4,3 +4,4 @@ build-plugins*
 *.lib
 *.pdb
 project_file.xml
+build/

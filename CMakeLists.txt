@@ -36,6 +36,23 @@ include_directories(
 # Define the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
+# PYTHON ZONE
+add_executable(python_interface src/interface/python.cpp)
+target_link_libraries(python_interface
+   Boost::system
+   Boost::filesystem
+   Qt6::Core
+   Qt6::Gui
+   Qt6::Widgets
+   Qt6::Qml
+   Qt6::Sql
+   Qt6::Xml
+   Qt6::Concurrent
+)
+set_target_properties(python_interface PROPERTIES CXX_STANDARD 17)
+# END PYTHON ZONE
+
+
 # Link libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
    Boost::system
