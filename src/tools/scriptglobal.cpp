@@ -50,8 +50,8 @@
 #include "spatialanalysis.h"
 #include "scripttree.h"
 #include "scriptresourceunit.h"
-#include "fmsaplinglist.h"
-#include "fmtreelist.h"
+// #include "fmsaplinglist.h"
+// #include "fmtreelist.h"
 #include "scriptgrid.h"
 #include "customaggout.h"
 #include "microclimate.h"
@@ -1330,8 +1330,8 @@ void ScriptGlobal::setupGlobalScripting()
     ScriptTree::addToScriptEngine(*engine);
     ScriptTreeExpr::addToScriptEngine(*engine);
     ScriptGrid::addToScriptEngine(engine);
-    ABE::FMSaplingList::addToScriptEngine(engine);
-    ABE::FMTreeList::addToScriptEngine(engine);
+    // ABE::FMSaplingList::addToScriptEngine(engine);
+    // ABE::FMTreeList::addToScriptEngine(engine);
 
 }
 

@@ -17,12 +17,11 @@
 **    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ********************************************************************************************/
 
-
 #include <QString>
 #include <QRegularExpression>
 
 static const char *version = "2.0";
-const char *currentVersion(){ return version;}
+const char *currentVersion() { return version; }
 
 // compiler version
 #ifdef Q_CC_MSVC
@@ -63,7 +62,6 @@ const char *currentVersion(){ return version;}
 #define BITS "64 bit"
 #endif
 
-
 QString compiler()
 {
     return QString("%1 %2 Qt %3").arg(MYCC).arg(BITS).arg(qVersion());
@@ -78,24 +76,23 @@ QString compiler()
 
 QString verboseVersion()
 {
-    QString s = QString("branch: %1, version: %2, date: %3").arg(GIT_BRANCH).arg(GIT_HASH).arg(BUILD_TIMESTAMP);
+    QString s = QString("CUSTOM_VERSION");
     return s;
-
 }
 
 QString verboseVersionHtml()
 {
-    QString s = QString("branch: %1, version: <a href=\"https://github.com/edfm-tum/iland-model/tree/%2\">%2</a>, date: %3").arg(GIT_BRANCH).arg(GIT_HASH).arg(BUILD_TIMESTAMP);
+    QString s = QString("CUSTOM_VERSION_HTML");
     return s;
-
 }
 
 QString buildYear()
 {
-    QString s(BUILD_TIMESTAMP);
+    QString s("UNKNOWN");
     QRegularExpression yearRegex("(\\d{4})");
     QRegularExpressionMatch match = yearRegex.match(s);
-    if (match.hasMatch()) {
+    if (match.hasMatch())
+    {
         QString year = match.captured(1); // Access the captured year
         return year;
     }

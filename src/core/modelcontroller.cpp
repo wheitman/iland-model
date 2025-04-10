@@ -29,7 +29,6 @@
 #include "model.h"
 #include "debugtimer.h"
 #include "helper.h"
-#include "version.h"
 #include "expression.h"
 #include "expressionwrapper.h"
 #include "../output/outputmanager.h"
@@ -40,7 +39,6 @@
 #include "statdata.h"
 
 
-#include "biteengine.h"
 
 #ifdef ILAND_GUI
 #include "mainwindow.h" // for the debug message buffering
@@ -169,7 +167,6 @@ void ModelController::create()
     qDebug() << "**************************************************";
     qDebug() << "project-file:" << mInitFile;
     qDebug() << "started at: " << QDateTime::currentDateTime().toString("yyyy/MM/dd hh:mm:ss");
-    qDebug() << "iLand " << currentVersion() << " (" << verboseVersion() << ")";
     qDebug() << "**************************************************";
 
 
@@ -706,44 +703,44 @@ void ModelController::removePaintLayers(QObject *handler)
 #endif
 }
 
-Grid<double> *ModelController::preparePaintGrid(QObject *handler, QString name, std::pair<QStringList, QStringList> *rNamesColors)
-{
-    // call the slot "paintGrid" from the handler.
-    // the handler slot should return a pointer to a (double) grid
-    Grid<double> *grid_ptr = nullptr;
-    bool success = false;
-    handler->dumpObjectTree();
+// Grid<double> *ModelController::preparePaintGrid(QObject *handler, QString name, std::pair<QStringList, QStringList> *rNamesColors)
+// {
+//     // call the slot "paintGrid" from the handler.
+//     // the handler slot should return a pointer to a (double) grid
+//     Grid<double> *grid_ptr = nullptr;
+//     bool success = false;
+//     handler->dumpObjectTree();
 
 
-    //if (handler->metaObject()->indexOfMethod("paintGrid")>-1) {
-        success = QMetaObject::invokeMethod(handler, "paintGrid", Qt::DirectConnection,
-                                                 Q_RETURN_ARG(Grid<double> *, grid_ptr),
-                                                 Q_ARG(QString, name),
-                                                 Q_ARG(QStringList&, rNamesColors->first),
-                                                 Q_ARG(QStringList&, rNamesColors->second)
-                                                 );
-    //}
+//     //if (handler->metaObject()->indexOfMethod("paintGrid")>-1) {
+//         success = QMetaObject::invokeMethod(handler, "paintGrid", Qt::DirectConnection,
+//                                                  Q_RETURN_ARG(Grid<double> *, grid_ptr),
+//                                                  Q_ARG(QString, name),
+//                                                  Q_ARG(QStringList&, rNamesColors->first),
+//                                                  Q_ARG(QStringList&, rNamesColors->second)
+//                                                  );
+//     //}
 
-    if (success) {
-        return grid_ptr;
-    }
+//     if (success) {
+//         return grid_ptr;
+//     }
 
-    // In case the request is not handled, we fall back to asking BITE.
-    Grid<double> *grid = BITE::BiteEngine::instance()->preparePaintGrid(handler, name);
-    if (grid)
-        return grid;
-    return nullptr;
-}
+//     // In case the request is not handled, we fall back to asking BITE.
+//     Grid<double> *grid = BITE::BiteEngine::instance()->preparePaintGrid(handler, name);
+//     if (grid)
+//         return grid;
+//     return nullptr;
+// }
 
-QStringList ModelController::evaluateClick(QObject *handler, const QPointF coord, const QString &grid_name)
-{
-    return BITE::BiteEngine::instance()->evaluateClick(handler, coord, grid_name);
-}
+// QStringList ModelController::evaluateClick(QObject *handler, const QPointF coord, const QString &grid_name)
+// {
+//     return BITE::BiteEngine::instance()->evaluateClick(handler, coord, grid_name);
+// }
 
-double ModelController::valueAtHandledGrid(QObject *handler, const QPointF coord, const int layer_id)
-{
-    return BITE::BiteEngine::instance()->variableValueAt(handler, coord, layer_id);
-}
+// double ModelController::valueAtHandledGrid(QObject *handler, const QPointF coord, const int layer_id)
+// {
+//     return BITE::BiteEngine::instance()->variableValueAt(handler, coord, layer_id);
+// }
 
 void ModelController::setViewport(QPointF center_point, double scale_px_per_m)
 {

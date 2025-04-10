@@ -24,7 +24,7 @@
 #include "species.h"
 #include "model.h"
 #include "debugtimer.h"
-#include "modules.h"
+// #include "modules.h"
 #include "permafrost.h"
 
 /** @class WaterCycle
@@ -412,7 +412,7 @@ void WaterCycle::run()
     mMeanGrowingSeasonSWC /= static_cast<double>(growing_season_days);
 
     // call external modules
-    GlobalSettings::instance()->model()->modules()->calculateWater(mRU, &add_data);
+    // GlobalSettings::instance()->model()->modules()->calculateWater(mRU, &add_data);
     mLastYear = GlobalSettings::instance()->currentYear();
 
     // reset deciduous litter counter

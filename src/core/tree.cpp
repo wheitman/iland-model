@@ -27,9 +27,7 @@
 #include "model.h"
 #include "snag.h"
 
-#include "forestmanagementengine.h"
-#include "modules.h"
-#include "biteengine.h"
+// #include "modules.h"
 
 #include "treeout.h"
 #include "landscapeout.h"
@@ -1135,16 +1133,16 @@ void Tree::altMortality(TreeGrowthData &d)
 void Tree::notifyTreeRemoved(TreeRemovalType reason)
 {
     // this information is used to track the removed volume for stands based on grids (and for salvaging operations)
-    ABE::ForestManagementEngine *abe = GlobalSettings::instance()->model()->ABEngine();
-    if (abe)
-        abe->notifyTreeRemoval(this, static_cast<int>(reason));
+    // ABE::ForestManagementEngine *abe = GlobalSettings::instance()->model()->ABEngine();
+    // if (abe)
+    //     abe->notifyTreeRemoval(this, static_cast<int>(reason));
 
-    BITE::BiteEngine *bite = GlobalSettings::instance()->model()->biteEngine();
-    if (bite)
-        bite->notifyTreeRemoval(this, static_cast<int>(reason));
+    // BITE::BiteEngine *bite = GlobalSettings::instance()->model()->biteEngine();
+    // if (bite)
+    //     bite->notifyTreeRemoval(this, static_cast<int>(reason));
 
     // tell disturbance modules that a tree died
-    GlobalSettings::instance()->model()->modules()->treeDeath(this, static_cast<int>(reason) );
+    // GlobalSettings::instance()->model()->modules()->treeDeath(this, static_cast<int>(reason) );
 
     // update reason, if ABE handled the tree
     if (reason==TreeDisturbance && isHarvested())

@@ -113,7 +113,7 @@ public:
     Environment *environment() const {return mEnvironment; }
     Saplings *saplings() const {return mSaplings; }
     TimeEvents *timeEvents() const { return mTimeEvents; }
-    Modules *modules() const { return mModules; }
+    // Modules *modules() const { return mModules; }
     const DEM *dem() const { return mDEM; }
     GrassCover *grassCover() const { return mGrassCover; }
     SpeciesSet *speciesSet() const { if (mSpeciesSets.count()==1) return mSpeciesSets.first(); return NULL; }
@@ -177,7 +177,7 @@ private:
     /// container holding all the climate objects
     QList<Climate*> mClimates;
     //
-    Modules *mModules; ///< the list of modules/plugins
+    // Modules *mModules; ///< the list of modules/plugins
     //
     QRectF mModelRect; ///< extent of the model (without buffer)
     double mTotalStockableArea; ///< total stockable area (ha)

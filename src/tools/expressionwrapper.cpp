@@ -39,7 +39,7 @@
 #include "soil.h"
 #include "climate.h"
 #include "saplings.h"
-#include "patches.h"
+// #include "patches.h"
 
 #include <QtCore>
 
@@ -129,7 +129,7 @@ double TreeWrapper::value(const int variableIndex)
     case 25: return mTree->isMarkedAsCropCompetitor()?1:0; // markcompetitor
     case 26: return static_cast<double>(mTree->mBranchMass);
     case 27: return mTree->species()->isConiferous();
-    case 28: return ABE::Patches::getPatch(mTree->positionIndex()); // patch
+    // case 28: return ABE::Patches::getPatch(mTree->positionIndex()); // patch
     }
     return ExpressionWrapper::value(variableIndex);
 }
@@ -235,10 +235,10 @@ double SaplingWrapper::value(const int variableIndex)
               size_t index = diff * sizeof(int) / sizeof(SaplingCell); // convert to difference in "SaplingCell" (with size (currently) 72 bytes)
               QPointF p = Saplings::coordOfCell(mRU, index);
               return p.y();    }
-    case 8:  { size_t diff = (int*)(mSapling) - (int*)( mRU->saplingCellArray() ); // difference in int* ptr (64bit, usually)
-              size_t index = diff * sizeof(int) / sizeof(SaplingCell); // convert to difference in "SaplingCell" (with size (currently) 72 bytes)
-              QPoint p = Saplings::coordOfCellLIF(mRU, index);
-              return ABE::Patches::getPatch(p);    }
+    // case 8:  { size_t diff = (int*)(mSapling) - (int*)( mRU->saplingCellArray() ); // difference in int* ptr (64bit, usually)
+    //           size_t index = diff * sizeof(int) / sizeof(SaplingCell); // convert to difference in "SaplingCell" (with size (currently) 72 bytes)
+    //           QPoint p = Saplings::coordOfCellLIF(mRU, index);
+    //           return ABE::Patches::getPatch(p);    }
 
     }
 
