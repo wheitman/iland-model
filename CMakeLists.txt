@@ -36,8 +36,14 @@ include_directories(
 # Define the executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
+
 # PYTHON ZONE
 add_executable(python_interface src/interface/python.cpp)
+
+# Add all source files required for python_interface
+file(GLOB_RECURSE ALL_SOURCES "src/*.cpp")  # Include all .cpp files in the src directory
+target_sources(python_interface PRIVATE ${ALL_SOURCES})
+
 target_link_libraries(python_interface
    Boost::system
    Boost::filesystem

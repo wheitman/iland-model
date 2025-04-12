@@ -686,7 +686,7 @@ ResourceUnit *Model::ruById(int id) const
 void Model::initOutputDatabase()
 {
     GlobalSettings *g = GlobalSettings::instance();
-    QString dbPath = g->path(g->settings().value("system.database.out"), "output");
+    QString dbPath = g->path(g->settings().value("system.database.out"), "");
     // replace path information
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
     dbPath.replace("$date$", timestamp);

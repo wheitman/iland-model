@@ -28,29 +28,29 @@
 #include <QString>
 
 #include "consoleshell.h"
-int main(int argc, char *argv[])
-{
-    QCoreApplication a(argc, argv);
-    QString copyright_str = QString("(c) Werner Rammer, Rupert Seidl, 2009-%1").arg(buildYear());
+// int main(int argc, char *argv[])
+// {
+//     QCoreApplication a(argc, argv);
+//     QString copyright_str = QString("(c) Werner Rammer, Rupert Seidl, 2009-%1").arg(buildYear());
 
-    printf("iLand console (%s)\n", currentVersion());
-    printf("This is the console version of iLand, the individual based\nlandscape and disturbance forest model.\n");
-    printf("More at: https://iland-model.org \n");
-    printf("%s\n", copyright_str.toLocal8Bit().data());
-    printf("version: %s\n", verboseVersion().toLocal8Bit().data());
-    printf("**********************************************************\n\n");
-    if (a.arguments().count()<3) {
-        printf("Usage: \n");
-        printf("ilandc.exe <xml-project-file> <years> <...other options>\n");
-        printf("Options:\n");
-        printf("you specify a number key=value pairs, and *after* loading of the project\n");
-        printf("the 'key' settings are set to 'value'. E.g.: ilandc project.xml 100 output.stand.enabled=false output.stand.landscape=false\n");
-        printf("See also https://iland-model.org/iLand+console\n.");
-        return 0;
-    }
-    ConsoleShell iland_shell;
+//     printf("iLand console (%s)\n", currentVersion());
+//     printf("This is the console version of iLand, the individual based\nlandscape and disturbance forest model.\n");
+//     printf("More at: https://iland-model.org \n");
+//     printf("%s\n", copyright_str.toLocal8Bit().data());
+//     printf("version: %s\n", verboseVersion().toLocal8Bit().data());
+//     printf("**********************************************************\n\n");
+//     if (a.arguments().count()<3) {
+//         printf("Usage: \n");
+//         printf("ilandc.exe <xml-project-file> <years> <...other options>\n");
+//         printf("Options:\n");
+//         printf("you specify a number key=value pairs, and *after* loading of the project\n");
+//         printf("the 'key' settings are set to 'value'. E.g.: ilandc project.xml 100 output.stand.enabled=false output.stand.landscape=false\n");
+//         printf("See also https://iland-model.org/iLand+console\n.");
+//         return 0;
+//     }
+//     ConsoleShell iland_shell;
 
-    QTimer::singleShot(0, &iland_shell, SLOT(run()));
-    //a.installEventFilter(&iland_shell);
-    return a.exec();
-}
+//     QTimer::singleShot(0, &iland_shell, SLOT(run()));
+//     //a.installEventFilter(&iland_shell);
+//     return a.exec();
+// }

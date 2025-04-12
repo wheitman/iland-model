@@ -461,7 +461,7 @@ void GlobalSettings::setupDirectories(QDomElement pathNode, const QString &proje
     mFilePath.insert("home", homePath);
     // make other paths relativ to "home" if given as relative paths
     mFilePath.insert("lip", path(xml.value("lip", "lip"), "home"));
-    mFilePath.insert("database", path(xml.value("database", "database"), "home"));
+    mFilePath.insert("database", path(xml.value("database", ""), "home"));
     mFilePath.insert("temp", path(xml.value("temp", "", false), "home"));
     mFilePath.insert("log", path(xml.value("log", "", false), "home"));
     mFilePath.insert("script", path(xml.value("script", "", false), "home"));

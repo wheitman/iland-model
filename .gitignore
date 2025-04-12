@@ -5,3 +5,5 @@ build-plugins*
 *.pdb
 project_file.xml
 build/
+*.sqlite
+*.csv
