@@ -55,7 +55,7 @@ Thom et al (2022, GCB, 10.1111/gcb.16133) for details on the dataset.-->
             <debugOutputAutoSave>true</debugOutputAutoSave>
             <randomSeed>0</randomSeed>
             <expressionLinearizationEnabled>true</expressionLinearizationEnabled>
-            <logLevel>Debug</logLevel>
+            <logLevel>Info</logLevel>
             <responsive>false</responsive>
             <threadCount>8</threadCount>
         </settings>
@@ -439,7 +439,7 @@ Thom et al (2022, GCB, 10.1111/gcb.16133) for details on the dataset.-->
         </dynamicstand>
         <tree>
             <!-- individual tree output -->
-            <enabled>false</enabled>
+            <enabled>true</enabled>
             <!-- modulo: mod(id,100)=0 -->
             <filter></filter>
         </tree>
@@ -449,7 +449,7 @@ Thom et al (2022, GCB, 10.1111/gcb.16133) for details on the dataset.-->
             <filter></filter>
         </treeremoved>
         <stand>
-            <enabled>false</enabled>
+            <enabled>true</enabled>
             <condition>mod(year,10)=0</condition>
         </stand>
         <standdead>
