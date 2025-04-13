@@ -15,6 +15,108 @@ from stable_baselines3.common.results_plotter import load_results, ts2xy
 from tqdm import trange
 
 
+shortnames = [
+    "abal",
+    "acca",
+    "acpl",
+    "acps",
+    "algl",
+    "alin",
+    "alvi",
+    "bepe",
+    "cabe",
+    "casa",
+    "coav",
+    "fasy",
+    "frex",
+    "lade",
+    "piab",
+    "pice",
+    "pimu",
+    "pini",
+    "pisy",
+    "poni",
+    "potr",
+    "psme",
+    "qupe",
+    "qupu",
+    "quro",
+    "rops",
+    "saca",
+    "soar",
+    "soau",
+    "tico",
+    "tipl",
+    "ulgl",
+    "abal",
+    "acca",
+    "acpl",
+    "acps",
+    "algl",
+    "alin",
+    "alvi",
+    "bepe",
+    "cabe",
+    "casa",
+    "coav",
+    "fasy",
+    "frex",
+    "lade",
+    "piab",
+    "pice",
+    "pimu",
+    "pini",
+    "pisy",
+    "poni",
+    "potr",
+    "psme",
+    "qupe",
+    "qupu",
+    "quro",
+    "rops",
+    "saca",
+    "soar",
+    "soau",
+    "tico",
+    "tipl",
+    "ulgl",
+    "abal",
+    "acca",
+    "acpl",
+    "acps",
+    "algl",
+    "alin",
+    "alvi",
+    "bepe",
+    "cabe",
+    "casa",
+    "coav",
+    "fasy",
+    "frex",
+    "lade",
+    "piab",
+    "pice",
+    "pimu",
+    "pini",
+    "pisy",
+    "poni",
+    "potr",
+    "psme",
+    "qupe",
+    "qupu",
+    "quro",
+    "rops",
+    "saca",
+    "soar",
+    "soau",
+    "tico",
+    "tipl",
+    "ulgl",
+]
+
+shortnames = shortnames[::10]  # Take every 10th name for a smaller set
+
+
 def set_all_seeds(seed):
     """Set all seeds for reproducibility"""
     # Python's built-in random module
@@ -39,28 +141,28 @@ def set_all_seeds(seed):
 
 
 set_all_seeds(64)
-env = ForestEnv(render_mode="human")
+env = ForestEnv(species_names=shortnames, render_mode="human")
 
 obs, _ = env.reset()
 env.render()
 
-# check_env(env, warn=True)
+check_env(env, warn=True)
 
 # Hardcoded method
-for step in trange(30, unit="steps"):
-    # print(f"Step {step + 1}")
-    obs, reward, terminated, truncated, info = env.step(
-        [random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1)]
-    )
-    done = terminated or truncated
+# for step in trange(30, unit="steps"):
+#     # print(f"Step {step + 1}")
+#     obs, reward, terminated, truncated, info = env.step(
+#         [random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1)]
+#     )
+#     done = terminated or truncated
 
-    # print(reward)
+#     # print(reward)
 
-    # print("obs=", obs, "reward=", reward, "done=", done)
-    env.render()
-    if done:
-        print("Goal reached!", "reward=", reward)
-        break
+#     # print("obs=", obs, "reward=", reward, "done=", done)
+#     env.render()
+#     if done:
+#         print("Goal reached!", "reward=", reward)
+#         break
 
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
@@ -114,17 +216,20 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
 
 
 save_dir = "baseline_checkpoints/"
-callback = SaveOnBestTrainingRewardCallback(check_freq=500, log_dir=save_dir, verbose=1)
+callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=save_dir, verbose=1)
 os.makedirs(save_dir, exist_ok=True)
 
-model = PPO.load(f"{save_dir}/ppo_forest")
+# model = PPO("MlpPolicy", env, verbose=1)
+model = PPO.load(f"{save_dir}/best_model.zip", env=env)
+
 
 vec_env = make_vec_env(
-    ForestEnv, n_envs=1, env_kwargs={"render_mode": "human"}, monitor_dir=save_dir
+    ForestEnv, n_envs=1, env_kwargs={"species_names": shortnames}, monitor_dir=save_dir
 )
 
 
 model.set_env(vec_env)
+
 model.learn(50000, progress_bar=True, callback=callback)
 
 # model = PPO("MlpPolicy", vec_env, verbose=1).learn(

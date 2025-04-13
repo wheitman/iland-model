@@ -7,3 +7,4 @@ project_file.xml
 build/
 *.sqlite
 *.csv
+__pycache__/

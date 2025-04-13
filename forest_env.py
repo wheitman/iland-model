@@ -143,10 +143,6 @@ class ForestEnv(gym.Env):
         11.51;25.11;fasy;55;35;100;1
         """
 
-        # Check if the file exists
-        if os.path.isfile(path):
-            print(f"File '{path}' already exists. Overwriting it.")
-
         # Open the file in write mode
         with open(path, "w") as f:
             # Write the header
@@ -160,7 +156,7 @@ class ForestEnv(gym.Env):
 
                 f.write(f"{x:.2f};{y:.2f};{species};{dbh:.2f};{height:.2f};{age:.2f}\n")
 
-    def run_simulation(path="build/python_interface"):
+    def run_simulation(self, path="build/python_interface"):
         """
         Run the executable in the path. Wait for it to finish."""
 
@@ -174,8 +170,8 @@ class ForestEnv(gym.Env):
             result = subprocess.run([path], check=True, capture_output=True, text=True)
 
             # Print the output
-            print(result.stdout)
-            print(result.stderr)
+            # print(result.stdout)
+            # print(result.stderr)
 
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
@@ -204,18 +200,18 @@ class ForestEnv(gym.Env):
             return
 
         # Print the number of rows
-        print(f"Found {len(tree_data)} rows in the tree table.")
+        # print(f"Found {len(tree_data)} rows in the tree table.")
 
         # Print the data
-        print("\ntree table contents:")
-        print(tree_data)
+        # print("\ntree table contents:")
+        # print(tree_data)
 
         final_year = tree_data["year"].max()
-        print(f"\nFinal year: {final_year}")
+        # print(f"\nFinal year: {final_year}")
 
         total_carbon = get_total_carbon(tree_data, final_year)
 
-        print(f"Total carbon in the final year: {total_carbon:.2f} kg")
+        # print(f"Total carbon in the final year: {total_carbon:.2f} kg")
 
         return tree_data, total_carbon
 
@@ -226,8 +222,8 @@ class ForestEnv(gym.Env):
         where the agent wants to plant a seedling.
         """
         # Convert action to coordinates
-        x = int((action[0] + 1) / 2 * self.grid_size)
-        y = int((action[1] + 1) / 2 * self.grid_size)
+        x = (action[0] + 1) / 2 * self.grid_size
+        y = (action[1] + 1) / 2 * self.grid_size
         x = min(max(x, 0), self.grid_size - 1)
         y = min(max(y, 0), self.grid_size - 1)
         species_index = int((action[2] + 1) / 2 * (len(self.species_names) - 1))
@@ -254,6 +250,9 @@ class ForestEnv(gym.Env):
         self.current_carbon = total_carbon
 
         reward = self.current_carbon - self.previous_carbon
+
+        # print(f"Reward: {reward:.2f} kg")
+
         self.previous_carbon = self.current_carbon
 
         info = {}
@@ -273,7 +272,7 @@ class ForestEnv(gym.Env):
         elif self.render_mode == "human":
             fig, ax = plt.subplots()
             ax.imshow(self.get_observation(), cmap="viridis")
-            ax.set_title(f"Iteration {len(self.seedlings_planted)}")
+            ax.set_title(f"Iteration {len(self.seedlings_planted)}. Carbon: {self.current_carbon:.2f} kg")
             plt.savefig("output/latest.png")
 
     def close(self):

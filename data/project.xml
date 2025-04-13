@@ -177,7 +177,7 @@ Thom et al (2022, GCB, 10.1111/gcb.16133) for details on the dataset.-->
                 </seedBelt>
                 <dumpSeedMapsEnabled>false</dumpSeedMapsEnabled>
                 <dumpSeedMapsPath></dumpSeedMapsPath>
-                <externalSeedEnabled>true</externalSeedEnabled>
+                <externalSeedEnabled>false</externalSeedEnabled>
                 <externalSeedBackgroundInput></externalSeedBackgroundInput>
                 <externalSeedSource></externalSeedSource>
                 <!-- direction of external seeds. specifiy as list of n,e,s,w (north, east, south,
