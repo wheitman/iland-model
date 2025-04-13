@@ -6,6 +6,7 @@ import subprocess
 import os
 import sqlite3
 import pandas as pd
+from skimage.draw import random_shapes
 
 
 def read_table(db_path="output.sqlite", table_name="stand") -> pd.DataFrame:
@@ -92,15 +93,32 @@ class ForestEnv(gym.Env):
         self.seedlings_planted = []
         self.previous_carbon = 0.0
         self.species_names = species_names
+        self.keepout = self.get_random_keepout_mask(grid_size)
 
         self.action_space = spaces.Box(-1, 1, shape=(3,), dtype=np.float32)
 
         self.observation_space = spaces.Box(
             low=0,
-            high=len(species_names),
+            high=len(species_names) + 1,
             shape=(grid_size, grid_size, 1),
             dtype=np.uint8,
         )
+
+    def get_random_keepout_mask(self, size):
+        image, labels = random_shapes(
+            (size, size),
+            max_shapes=10,
+            min_shapes=1,
+            min_size=size // 8,
+            max_size=size // 4,
+            allow_overlap=True,
+            channel_axis=None,
+        )
+
+        # This is the area not populated by any shape
+        mask = image < 255
+
+        return mask
 
     def get_observation(self):
         """
@@ -108,13 +126,19 @@ class ForestEnv(gym.Env):
         where each cell contains the index of the species planted at that location.
         If no species is planted, the cell contains 0.
         """
+        # obs = np.zeros((self.grid_size, self.grid_size, 1), dtype=np.uint8)
+
+        # Start with a grid where 0 is empty and 1 is keep out
+
+        # Make obs a 3D array (add a new axis to self.keepout)
         obs = np.zeros((self.grid_size, self.grid_size, 1), dtype=np.uint8)
+        obs[:, :, 0] = self.keepout
 
         # Populate the observation grid with species data
         for seedling in self.seedlings_planted:
             x, y = int(seedling[0]), int(seedling[1])
             species_index = self.species_names.index(seedling[2])
-            obs[x, y, 0] = species_index
+            obs[x, y, 0] = species_index + 2  # +2 because 0 is empty and 1 is keep out
 
         return obs
 
@@ -127,6 +151,7 @@ class ForestEnv(gym.Env):
         self.seedlings_planted = []
         self.previous_carbon = 0.0
         self.current_carbon = 0.0
+        self.keepout = self.get_random_keepout_mask(self.grid_size)
         obs = self.get_observation()
         return obs, {}
 
@@ -228,6 +253,12 @@ class ForestEnv(gym.Env):
         y = min(max(y, 0), self.grid_size - 1)
         species_index = int((action[2] + 1) / 2 * (len(self.species_names) - 1))
 
+        # Skip and send negative reward if the coordinates are in the keepout area
+        if self.keepout[int(x), int(y)] == 1:
+            # print("Coordinates are in the keepout area.")
+            reward = -100.0
+            return (self.get_observation(), reward, False, False, {})
+
         # Plant a seedling at the specified coordinates
         seedling = [x, y, self.species_names[species_index]]
         self.seedlings_planted.append(seedling)
@@ -272,7 +303,9 @@ class ForestEnv(gym.Env):
         elif self.render_mode == "human":
             fig, ax = plt.subplots()
             ax.imshow(self.get_observation(), cmap="viridis")
-            ax.set_title(f"Iteration {len(self.seedlings_planted)}. Carbon: {self.current_carbon:.2f} kg")
+            ax.set_title(
+                f"Iteration {len(self.seedlings_planted)}. Carbon: {self.current_carbon:.2f} kg"
+            )
             plt.savefig("output/latest.png")
 
     def close(self):

@@ -219,8 +219,9 @@ save_dir = "baseline_checkpoints/"
 callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=save_dir, verbose=1)
 os.makedirs(save_dir, exist_ok=True)
 
-# model = PPO("MlpPolicy", env, verbose=1)
-model = PPO.load(f"{save_dir}/best_model.zip", env=env)
+print("Training the agent...")
+model = PPO("MlpPolicy", env, verbose=1)
+# model = PPO.load(f"{save_dir}/best_model.zip", env=env)
 
 
 vec_env = make_vec_env(
