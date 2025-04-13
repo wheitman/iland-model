@@ -1,4 +1,5 @@
 import sqlite3
+import time
 import pandas as pd
 
 #!/usr/bin/env python3
@@ -463,6 +464,8 @@ def get_available_lips():
     return shortnames
 
 
+
+
 if __name__ == "__main__":
 
     # species_params = get_species_params()
@@ -479,18 +482,15 @@ if __name__ == "__main__":
     # print(f"Available LIPs: {lips}")
 
     # available_species = lips  # Only use species with LIPs
-    # available_species.remove("readerstamp")
-    # available_species.remove("alru")
-    # available_species.remove("abam")
-    # available_species.remove("acma")
-    # available_species.remove("tsme")
-    # available_species.remove("acru")
 
     generate_init_file(
         path="data/seedling_init.txt", species_names=shortnames, seedling_count=300
     )
 
+    start = time.time()
     result = run_process(path="build/python_interface")
+    end = time.time()
+    print(f"Process took {end - start:.2f} seconds.")
 
     if result is None:
         print("Error: Could not run the process.")
