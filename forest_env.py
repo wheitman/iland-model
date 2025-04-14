@@ -288,7 +288,18 @@ class ForestEnv(gym.Env):
 
         info = {}
 
-        return (self.get_observation(), reward, terminated, truncated, info)
+        obs = self.get_observation()
+
+        if len(self.seedlings_planted) % 10 == 0:
+
+            plt.imshow(obs)
+            plt.title(
+                f"R = {reward:.2f} kg, {len(self.seedlings_planted)}/{self.total_seedlings} seedlings"
+            )
+            plt.savefig("output/obs.png")
+            plt.close()
+
+        return (obs, reward, terminated, truncated, info)
 
     def render(self):
         """

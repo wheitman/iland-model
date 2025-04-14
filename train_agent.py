@@ -1,20 +1,24 @@
+"""
+Simplified SAC training script with direct hyperparameters (no optimization).
+Use this if the Optuna optimization is freezing.
+"""
+
 from stable_baselines3.common.env_checker import check_env
+from tqdm import trange
 from forest_env import ForestEnv
-import random
 import os
-import gymnasium as gym
 import numpy as np
 import torch
-from stable_baselines3 import PPO
-from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import DummyVecEnv
-from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.results_plotter import load_results, ts2xy
-from tqdm import trange
+from stable_baselines3.common.env_util import make_vec_env
+import random
 
 
+# Set list of tree species names
 shortnames = [
     "abal",
     "acca",
@@ -48,132 +52,23 @@ shortnames = [
     "tico",
     "tipl",
     "ulgl",
-    "abal",
-    "acca",
-    "acpl",
-    "acps",
-    "algl",
-    "alin",
-    "alvi",
-    "bepe",
-    "cabe",
-    "casa",
-    "coav",
-    "fasy",
-    "frex",
-    "lade",
-    "piab",
-    "pice",
-    "pimu",
-    "pini",
-    "pisy",
-    "poni",
-    "potr",
-    "psme",
-    "qupe",
-    "qupu",
-    "quro",
-    "rops",
-    "saca",
-    "soar",
-    "soau",
-    "tico",
-    "tipl",
-    "ulgl",
-    "abal",
-    "acca",
-    "acpl",
-    "acps",
-    "algl",
-    "alin",
-    "alvi",
-    "bepe",
-    "cabe",
-    "casa",
-    "coav",
-    "fasy",
-    "frex",
-    "lade",
-    "piab",
-    "pice",
-    "pimu",
-    "pini",
-    "pisy",
-    "poni",
-    "potr",
-    "psme",
-    "qupe",
-    "qupu",
-    "quro",
-    "rops",
-    "saca",
-    "soar",
-    "soau",
-    "tico",
-    "tipl",
-    "ulgl",
 ]
-
-shortnames = shortnames[::10]  # Take every 10th name for a smaller set
+# shortnames = shortnames[::10]  # Take every 10th name for a smaller set
 
 
 def set_all_seeds(seed):
     """Set all seeds for reproducibility"""
-    # Python's built-in random module
     random.seed(seed)
-
-    # NumPy
     np.random.seed(seed)
-
-    # Gymnasium (if using)
-    gym.utils.seeding.np_random(seed)
-
-    # PyTorch (if using)
-    if "torch" in globals():
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)  # For multi-GPU
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-
-    # Environment variables (used by some libraries)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
     os.environ["PYTHONHASHSEED"] = str(seed)
-
-
-set_all_seeds(64)
-env = ForestEnv(species_names=shortnames, render_mode="human")
-
-obs, _ = env.reset()
-env.render()
-
-check_env(env, warn=True)
-
-# Hardcoded method
-# for step in trange(30, unit="steps"):
-#     # print(f"Step {step + 1}")
-#     obs, reward, terminated, truncated, info = env.step(
-#         [random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1)]
-#     )
-#     done = terminated or truncated
-
-#     # print(reward)
-
-#     # print("obs=", obs, "reward=", reward, "done=", done)
-#     env.render()
-#     if done:
-#         print("Goal reached!", "reward=", reward)
-#         break
 
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
-    Callback for saving a model (the check is done every ``check_freq`` steps)
-    based on the training reward (in practice, we recommend using ``EvalCallback``).
-
-    :param check_freq: (int)
-    :param log_dir: (str) Path to the folder where the model will be saved.
-      It must contains the file created by the ``Monitor`` wrapper.
-    :param verbose: (int)
+    Callback for saving a model based on the training reward.
     """
 
     def __init__(self, check_freq, log_dir, verbose=1):
@@ -184,56 +79,160 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
-        # Create folder if needed
         if self.save_path is not None:
             os.makedirs(self.save_path, exist_ok=True)
 
     def _on_step(self) -> bool:
         if self.n_calls % self.check_freq == 0:
-
-            # Retrieve training reward
             x, y = ts2xy(load_results(self.log_dir), "timesteps")
             if len(x) > 0:
-                # Mean training reward over the last 100 episodes
                 mean_reward = np.mean(y[-100:])
                 if self.verbose > 0:
+                    print(f"Num timesteps: {self.num_timesteps}")
                     print(
-                        "Best mean reward: {:.2f} - Last mean reward per episode: {:.2f}".format(
-                            self.best_mean_reward, mean_reward
-                        )
+                        f"Best mean reward: {self.best_mean_reward:.2f} - Last mean reward: {mean_reward:.2f}"
                     )
 
-                # New best model, you could save the agent here
+                # New best model, save it
                 if mean_reward > self.best_mean_reward:
                     self.best_mean_reward = mean_reward
-                    # Example for saving best model
                     if self.verbose > 0:
-                        print("Saving new best model at {} timesteps".format(x[-1]))
-                        print("Saving new best model to {}.zip".format(self.save_path))
+                        print(f"Saving new best model to {self.save_path}")
                     self.model.save(self.save_path)
 
         return True
 
 
-save_dir = "baseline_checkpoints/"
-callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=save_dir, verbose=1)
-os.makedirs(save_dir, exist_ok=True)
+def train_sac_agent():
+    """Train an SAC agent with direct hyperparameters."""
+    # Set seed for reproducibility
+    set_all_seeds(42)
 
-print("Training the agent...")
-model = PPO("MlpPolicy", env, verbose=1)
-# model = PPO.load(f"{save_dir}/best_model.zip", env=env)
+    # Create directories
+    save_dir = "sac_direct_checkpoints/"
+    os.makedirs(save_dir, exist_ok=True)
+
+    # Create and wrap the environment
+    env = ForestEnv(species_names=shortnames, num_seedlings=300)
+
+    # Check the environment
+    check_env(env, warn=True)
+
+    env.reset()
+
+    # Create vectorized environment with monitoring
+    vec_env = make_vec_env(
+        ForestEnv,
+        n_envs=1,
+        env_kwargs={"species_names": shortnames, "num_seedlings": 300},
+        monitor_dir=save_dir,
+    )
+
+    # Normalize observations (not rewards since it might make learning unstable)
+    vec_env = VecNormalize(vec_env, norm_obs=True, norm_reward=False)
+
+    # Define SAC hyperparameters
+    # These are conservative settings to prevent freezing
+    sac_params = {
+        "learning_rate": 3e-4,
+        "buffer_size": 10000,  # Smaller buffer to prevent memory issues
+        "learning_starts": 100,
+        "batch_size": 64,
+        "tau": 0.005,  # Soft update coefficient
+        "gamma": 0.99,  # Discount factor
+        "train_freq": 1,
+        "gradient_steps": 1,  # Only 1 gradient step per step to speed up training
+        "ent_coef": "auto",  # Automatic entropy tuning
+        "verbose": 1,
+        "device": "auto",
+        "policy_kwargs": dict(net_arch=[64, 64]),  # Smaller network
+    }
+
+    # Create the SAC agent
+    model = SAC("MlpPolicy", vec_env, **sac_params)
+    # model = SAC.load("sac_direct_checkpoints/best_model.zip", env=vec_env)
+
+    # Set up callback for saving the best model
+    callback = SaveOnBestTrainingRewardCallback(
+        check_freq=1000, log_dir=save_dir, verbose=1
+    )
+
+    # Train the agent
+    total_timesteps = 30000
+    print(f"Training SAC agent for {total_timesteps} timesteps...")
+
+    try:
+        model.learn(
+            total_timesteps=total_timesteps, callback=callback, progress_bar=False
+        )
+        print("Training completed successfully!")
+    except Exception as e:
+        print(f"Training was interrupted: {str(e)}")
+
+    # Save the final model
+    final_model_path = os.path.join(save_dir, "final_model")
+    model.save(final_model_path)
+
+    # Save the VecNormalize statistics
+    vec_env.save(os.path.join(save_dir, "vec_normalize.pkl"))
+
+    print(f"Training completed. Final model saved to {final_model_path}")
+    return model, vec_env
 
 
-vec_env = make_vec_env(
-    ForestEnv, n_envs=1, env_kwargs={"species_names": shortnames}, monitor_dir=save_dir
-)
+def test_agent(model, env, num_episodes=3):
+    """Test the trained agent for a few episodes."""
+    # Create a new environment for testing with rendering
+    test_env = ForestEnv(species_names=shortnames, render_mode="human")
+    test_env = DummyVecEnv([lambda: test_env])
+
+    # Load the normalization parameters
+    test_env = VecNormalize.load(
+        os.path.join("sac_direct_checkpoints/", "vec_normalize.pkl"), test_env
+    )
+    test_env.training = False  # Don't update normalization statistics during testing
+    test_env.norm_reward = False  # Don't normalize rewards
+
+    for episode in trange(num_episodes):
+        obs = test_env.reset()
+        done = False
+        total_reward = 0
+        steps = 0
+
+        while not done:
+            action, _ = model.predict(obs, deterministic=True)
+            print(action)
+            obs, reward, done, info = test_env.step(action)
+            total_reward += reward[0]  # Reward is a 1D array because of vectorized env
+            steps += 1
+
+            # Check if we're at the end of an episode
+            if done[0]:
+                break
+
+        print(f"Episode {episode+1}: Total Reward: {total_reward}, Steps: {steps}")
+
+    print("Testing completed!")
 
 
-model.set_env(vec_env)
+if __name__ == "__main__":
+    # Train the agent
+    # model, vec_env = train_sac_agent()
 
-model.learn(50000, progress_bar=True, callback=callback)
+    save_dir = "sac_direct_checkpoints/"
 
-# model = PPO("MlpPolicy", vec_env, verbose=1).learn(
-#     50000, progress_bar=True, callback=callback
-# )
-# model.save(os.path.join(save_dir, "ppo_forest"))
+    vec_env = make_vec_env(
+        ForestEnv,
+        n_envs=1,
+        env_kwargs={"species_names": shortnames},
+        monitor_dir=save_dir,
+    )
+
+    # Normalize observations (not rewards since it might make learning unstable)
+    vec_env = VecNormalize(vec_env, norm_obs=True, norm_reward=False)
+
+    model = SAC.load("sac_direct_checkpoints/best_model.zip", env=vec_env)
+
+    # Test the trained agent
+    print("Testing the trained agent...")
+    test_agent(model, vec_env)
