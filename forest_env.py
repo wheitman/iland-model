@@ -1,6 +1,9 @@
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+import matplotlib
+
+matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 import subprocess
 import os
