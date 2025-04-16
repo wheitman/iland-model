@@ -2,6 +2,7 @@
 forest_env.py - Complete implementation of the Forest Environment for RL
 """
 
+import math
 import random
 import numpy as np
 import gymnasium as gym
@@ -115,14 +116,18 @@ class ForestEnv(gym.Env):
         # Using channel-first format for CnnPolicy compatibility
         self.observation_space = spaces.Box(
             low=0,
-            high=len(species_names) + 2,  # Maximum value is number of species + 2
-            shape=(self.grid_size, self.grid_size, 1),  # Keep as 3D tensor for CNN
-            dtype=np.uint8,
+            high=max(
+                len(species_names) + 1, 1.0
+            ),  # For both species and normalized distance
+            shape=(grid_size, grid_size, 2),  # Changed to 2 channels
+            dtype=np.float32,  # Changed to float32 for the distance channel
         )
 
         self.num_failed_plantings = 0
 
     def get_random_keepout_mask(self, size):
+
+        # TRUE means "don't plant here"
 
         if random.random() < 0.5:
             # Create a random keepout mask with shapes.
@@ -171,22 +176,41 @@ class ForestEnv(gym.Env):
         - Keepout area where seedlings cannot be planted (1)
         - Planted seedlings (2 + species_index)
         """
-        # Initialize observation grid with zeros
-        obs = np.zeros((self.grid_size, self.grid_size), dtype=np.uint8)
+        # Base observation with keepout areas
+        obs = np.zeros(
+            (self.grid_size, self.grid_size, 2), dtype=np.float32
+        )  # Changed to 2 channels
+        obs[:, :, 0] = self.keepout
 
-        # Mark keepout areas with 1
-        obs[~self.keepout] = 1
+        # Add seedlings
+        for seedling in self.seedlings_planted:
+            # Ensure coordinates are within bounds by clamping them
+            x = min(int(seedling[0]), self.grid_size - 1)  # Clamp to grid_size - 1
+            y = min(int(seedling[1]), self.grid_size - 1)  # Clamp to grid_size - 1
 
-        # Mark planted seedlings with their species index + 2
-        for x, y, species_idx in self.seedlings_planted:
-            # Convert from real coordinates to grid indices
-            grid_x = int(min(max(0, x), self.grid_size - 1))
-            grid_y = int(min(max(0, y), self.grid_size - 1))
-            # Set the value to species_idx + 2 (so species 0 becomes 2, species 1 becomes 3, etc.)
-            obs[grid_y, grid_x] = species_idx + 2
+            # Ensure x and y are non-negative
+            x = max(0, x)
+            y = max(0, y)
 
-        # Reshape to match observation space (add channel dimension)
-        return obs.reshape(self.grid_size, self.grid_size, 1)
+            species_index = seedling[2]
+            obs[x, y, 0] = species_index + 2
+
+        # Add distance field in second channel
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                min_dist = float("inf")
+                for seedling in self.seedlings_planted:
+                    sx, sy = seedling[0], seedling[1]
+                    dist = np.sqrt((i - sx) ** 2 + (j - sy) ** 2)
+                    min_dist = min(min_dist, dist)
+
+                if len(self.seedlings_planted) > 0:
+                    # Normalize distance to [0, 1]
+                    obs[i, j, 1] = min(min_dist / (self.grid_size * 0.5), 1.0)
+                else:
+                    obs[i, j, 1] = 1.0  # Maximum distance when no seedlings
+
+        return obs
 
     def reset(self, seed=None, options=None):
         """
@@ -300,21 +324,16 @@ class ForestEnv(gym.Env):
 
         return tree_data, total_carbon
 
-    def get_smallest_seedling_distance(self):
+    def check_distance_to_existing_seedlings(self, x, y, min_distance=3.0):
         """
-        Calculate the smallest distance between all planted seedlings.
+        Check if a new seedling at (x,y) would be too close to any existing seedling.
+        Returns True if the location is valid (not too close), False otherwise.
         """
-        if len(self.seedlings_planted) < 2:
-            return float("inf")
-        distances = []
-        for i in range(len(self.seedlings_planted)):
-            for j in range(i + 1, len(self.seedlings_planted)):
-                dist = np.linalg.norm(
-                    np.array(self.seedlings_planted[i][:2])
-                    - np.array(self.seedlings_planted[j][:2])
-                )
-                distances.append(dist)
-        return min(distances) if distances else float("inf")
+        for sx, sy, _ in self.seedlings_planted:
+            dist = np.sqrt((x - sx) ** 2 + (y - sy) ** 2)
+            if dist < min_distance:
+                return False  # Too close to an existing seedling
+        return True  # Valid location
 
     def step(self, action):
         """
@@ -350,9 +369,9 @@ class ForestEnv(gym.Env):
         grid_x = int(min(max(0, x), self.grid_size - 1))
         grid_y = int(min(max(0, y), self.grid_size - 1))
 
-        valid_planting = (
-            self.keepout[grid_y, grid_x] and self.get_smallest_seedling_distance() > 0.5
-        )
+        valid_planting = ~self.keepout[
+            grid_y, grid_x
+        ] and self.check_distance_to_existing_seedlings(x, y, min_distance=0.5)
 
         info = {
             "planted_seedlings": len(self.seedlings_planted),
@@ -440,7 +459,7 @@ class ForestEnv(gym.Env):
             # Print a simplified view of the forest
             grid = np.zeros((self.grid_size, self.grid_size), dtype=str)
             grid.fill(".")  # Empty space
-            grid[~self.keepout] = "X"  # Keepout areas
+            grid[self.keepout] = "X"  # Keepout areas
 
             for x, y, species_idx in self.seedlings_planted:
                 grid_x = int(min(max(0, x), self.grid_size - 1))
@@ -475,7 +494,7 @@ class ForestEnv(gym.Env):
 
             # Set different colors for different elements
             # Keepout areas (red)
-            rgb_img[~self.keepout] = [255, 0, 0]
+            rgb_img[self.keepout] = [255, 0, 0]
 
             # Define a distinct color palette for different species
             # Using HSV color space for better color separation

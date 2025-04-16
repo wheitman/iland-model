@@ -9,6 +9,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
 from stable_baselines3.common.logger import configure
+from stable_baselines3.common.env_checker import check_env
 
 from forest_env import ForestEnv
 
@@ -93,6 +94,8 @@ def main():
         grid_size=100,  # Size of the grid
     )
 
+    check_env(env)  # Check if the environment is valid
+
     # Wrap environment for logging
     env = Monitor(env, log_dir)
 
@@ -136,11 +139,13 @@ def main():
 
             # CNN architecture
             self.cnn = nn.Sequential(
-                nn.Conv2d(n_input_channels, 32, kernel_size=3, stride=1, padding=1),
+                nn.Conv2d(n_input_channels, 32, kernel_size=5, stride=2, padding=2),
                 nn.ReLU(),
-                nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+                nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
                 nn.ReLU(),
-                nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0),
+                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+                nn.ReLU(),
+                nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
                 nn.ReLU(),
                 nn.Flatten(),
             )
@@ -155,51 +160,58 @@ def main():
 
             self.linear = nn.Sequential(nn.Linear(n_flatten, features_dim), nn.ReLU())
 
+        # Fix the normalization in the CNN
         def forward(self, observations: th.Tensor) -> th.Tensor:
-            # Extract from dict if observations is a dict
-            if isinstance(observations, dict):
-                observations = observations["image"]
-
             # Permute for PyTorch (batch, channel, height, width)
             observations = observations.permute(0, 3, 1, 2)
 
-            # Normalize input (scale to [0, 1])
-            observations = observations.float() / (len(species_names) + 2)
+            # Normalize species channel and keep distance channel as is
+            species_channel = observations[:, 0:1, :, :].float() / (
+                len(species_names) + 2
+            )
+            distance_channel = observations[
+                :, 1:2, :, :
+            ]  # Already normalized to [0, 1]
+
+            # Combine the channels
+            normalized_obs = th.cat([species_channel, distance_channel], dim=1)
 
             # Pass through CNN
-            features = self.cnn(observations)
+            features = self.cnn(normalized_obs)
 
             # Pass through final linear layer
             return self.linear(features)
 
     # Create model
+
     model = PPO(
-        "CnnPolicy",  # Using CNN policy to capture spatial relationships
+        "CnnPolicy",
         vec_env,
-        verbose=1,  # Logging verbosity
+        verbose=1,
         tensorboard_log=log_dir,
         learning_rate=3e-4,
-        n_steps=2048,  # Number of steps to collect before updating
-        batch_size=64,  # Batch size for each gradient update
-        n_epochs=10,  # Number of epochs to update the policy
-        gamma=0.99,  # Discount factor
-        gae_lambda=0.95,  # GAE lambda parameter
-        clip_range=0.2,  # Clip parameter for PPO
-        clip_range_vf=None,  # No separate clipping for value function
-        ent_coef=0.0,  # Entropy coefficient
-        vf_coef=0.5,  # Value function coefficient
-        max_grad_norm=0.5,  # Maximum gradient norm
-        device="auto",  # Use GPU if available
+        n_steps=1024,  # Reduced for better sample efficiency
+        batch_size=128,  # Increased for more stable learning
+        n_epochs=5,  # Reduced to prevent overfitting
+        gamma=0.99,
+        gae_lambda=0.95,
+        clip_range=0.2,
+        ent_coef=0.01,  # Add some exploration bonus
+        vf_coef=0.5,
+        max_grad_norm=0.5,
+        device="auto",
         policy_kwargs={
             "features_extractor_class": CustomCNN,
             "features_extractor_kwargs": {"features_dim": 256},
-            "normalize_images": False,  # We handle normalization in our custom extractor
+            "normalize_images": False,
+            # Deeper network for better pattern recognition
+            "net_arch": [256, 256, 128],
         },
     )
 
-    model = PPO.load(
-        os.path.join("models", "forest_model_45000_steps.zip"), env=vec_env
-    )
+    # model = PPO.load(
+    #     os.path.join("models", "forest_model_45000_steps.zip"), env=vec_env
+    # )
 
     # Train the model
     total_timesteps = 300000  # Total number of simulation steps
