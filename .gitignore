@@ -8,3 +8,6 @@ build/
 *.sqlite
 *.csv
 __pycache__/
+events.out.*
+*.zip
+*.pyc

@@ -12,6 +12,7 @@ from stable_baselines3.common.logger import configure
 from stable_baselines3.common.env_checker import check_env
 
 from forest_env import ForestEnv
+from matplotlib import pyplot as plt
 
 
 # Define a callback for logging additional metrics
@@ -209,47 +210,92 @@ def main():
         },
     )
 
-    # model = PPO.load(
-    #     os.path.join("models", "forest_model_45000_steps.zip"), env=vec_env
-    # )
+    model = PPO.load(
+        os.path.join("models", "forest_model_68000_steps.zip"), env=vec_env
+    )
+    print("LOADED MODEL")
 
     # Train the model
-    total_timesteps = 300000  # Total number of simulation steps
-    print(f"Training for {total_timesteps} timesteps...")
-    model.learn(
-        total_timesteps=total_timesteps,
-        callback=[checkpoint_callback, tensorboard_callback],
-        tb_log_name="forest_rl",
-        progress_bar=True,
-    )
+    # total_timesteps = 300000  # Total number of simulation steps
+    # print(f"Training for {total_timesteps} timesteps...")
+    # model.learn(
+    #     total_timesteps=total_timesteps,
+    #     callback=[checkpoint_callback, tensorboard_callback],
+    #     tb_log_name="forest_rl",
+    #     progress_bar=True,
+    # )
 
     # Save the final model
-    final_model_path = os.path.join(model_dir, "final_forest_model")
-    model.save(final_model_path)
-    print(f"Training completed. Final model saved to {final_model_path}")
+    # final_model_path = os.path.join(model_dir, "final_forest_model")
+    # model.save(final_model_path)
+    # print(f"Training completed. Final model saved to {final_model_path}")
 
     # Test the trained model
-    print("Testing the trained model...")
-    obs = vec_env.reset()
-    cumulative_reward = 0
 
-    for i in range(300):  # Plant all seedlings
-        action, _states = model.predict(obs, deterministic=True)
-        obs, rewards, dones, info = vec_env.step(action)
-        cumulative_reward += rewards[0]
-        vec_env.render()
+    for j in range(10):
+        print("Testing the trained model...")
+        obs = vec_env.reset()
+        cumulative_reward = 0
+        seedlings = []
+
+        plt.figure()
+
+        for i in range(300):  # Plant all seedlings
+            action, _states = model.predict(obs, deterministic=False)
+
+            if len(action) == 1:
+                action = action[0]
+
+            print(action)
+
+            # Normalize action from [-1, 1] to grid coordinates and species
+            x_norm = (action[0] + 1) / 2  # Convert from [-1, 1] to [0, 1]
+            y_norm = (action[1] + 1) / 2  # Convert from [-1, 1] to [0, 1]
+
+            # Convert to grid coordinates
+            x = x_norm * 100
+            y = y_norm * 100
+
+            # Convert species index from [-1, 1] to [0, len(species_names)-1]
+            species_norm = (action[2] + 1) / 2  # Convert from [-1, 1] to [0, 1]
+            species_idx = int(species_norm * (len(species_names) - 1))
+
+            # Round to ensure it's a valid index
+            species_idx = max(0, min(species_idx, len(species_names) - 1))
+
+            # Check if the planting location is valid (within keepout mask)
+
+            grid_x = int(min(max(0, x), 100 - 1))
+            grid_y = int(min(max(0, y), 100 - 1))
+            if grid_x < 0 or grid_x >= 100 or grid_y < 0 or grid_y >= 100:
+                continue
+
+            seedlings.append([grid_x, grid_y, species_names[species_idx]])
+            plt.scatter(x, y, label=species_names[species_idx])
+
+            obs, rewards, dones, info = vec_env.step([action])
+            cumulative_reward += rewards[0]
+            vec_env.render()
+
+            print(
+                f"Step {i+1}: Reward = {rewards[0]:.2f}, Total Carbon = {info[0].get('total_carbon', 0):.2f} kg"
+            )
+
+            if dones[0]:
+                print(
+                    f"Episode done! Final carbon: {info[0].get('total_carbon', 0):.2f} kg"
+                )
+                break
 
         print(
-            f"Step {i+1}: Reward = {rewards[0]:.2f}, Total Carbon = {info[0].get('total_carbon', 0):.2f} kg"
+            f"Testing completed for step {j}. Cumulative reward: {cumulative_reward:.2f}"
         )
 
-        if dones[0]:
-            print(
-                f"Episode done! Final carbon: {info[0].get('total_carbon', 0):.2f} kg"
-            )
-            break
-
-    print(f"Testing completed. Cumulative reward: {cumulative_reward:.2f}")
+        plt.legend()
+        plt.title(
+            f"Seedlings planted in episode {j}. Total carbon: {cumulative_reward:.2f} kg/year"
+        )
+        plt.savefig(f"seedlings_episode_{j}.png")
 
     # Close environment
     vec_env.close()

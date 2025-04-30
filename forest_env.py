@@ -369,9 +369,9 @@ class ForestEnv(gym.Env):
         grid_x = int(min(max(0, x), self.grid_size - 1))
         grid_y = int(min(max(0, y), self.grid_size - 1))
 
-        valid_planting = ~self.keepout[
-            grid_y, grid_x
-        ] and self.check_distance_to_existing_seedlings(x, y, min_distance=0.5)
+        valid_planting = (
+            not self.keepout[grid_y, grid_x]
+        ) and self.check_distance_to_existing_seedlings(x, y, min_distance=0.5)
 
         info = {
             "planted_seedlings": len(self.seedlings_planted),
