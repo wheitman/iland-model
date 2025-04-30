@@ -156,7 +156,14 @@ class Seedling:
 class ForestEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, size=10, num_seedlings=10, process_index=1):
+    def __init__(
+        self,
+        render_mode=None,
+        size=10,
+        num_seedlings=10,
+        process_index=1,
+        max_steps=100,
+    ):
 
         self.size = size  # The size of the square grid
         self.window_size = 512  # The size of the PyGame window
@@ -164,6 +171,8 @@ class ForestEnv(gym.Env):
 
         self.seedlings: list[Seedling] = []
         self.previous_carbon = 0.0  # Previous carbon storage for reward calculation
+        self.total_steps = 0
+        self.max_steps = max_steps  # Maximum number of steps in an episode
 
         self.process_index = process_index  # Process index for file management
         self._set_up_process_files()
@@ -260,8 +269,11 @@ class ForestEnv(gym.Env):
                 seedling.species, seedling.cluster
             )
 
-        # Now draw the agent as a white pixel
-        obs[self._agent_location[1], self._agent_location[0]] = (255, 255, 255)
+        # Now draw the agent as a semi-opaque white square
+        obs[self._agent_location[1], self._agent_location[0]] = np.mean(
+            [obs[self._agent_location[1], self._agent_location[0]], (255, 255, 255)],
+            axis=0,
+        ).astype(np.uint8)
 
         return obs
 
@@ -278,6 +290,7 @@ class ForestEnv(gym.Env):
         self._agent_location = self.np_random.integers(0, self.size, size=2, dtype=int)
         self.previous_carbon = 0.0  # Reset previous carbon storage
         self.seedlings = []  # Reset seedlings
+        self.total_steps = 0  # Reset total steps
 
         observation = self._get_obs()
         info = self._get_info()
@@ -288,6 +301,11 @@ class ForestEnv(gym.Env):
         return observation, info
 
     def step(self, action):
+
+        if self.render_mode == "human" and self.total_steps % 10 == 0:
+            print(f"Action: {action}, steps: {self.total_steps}/{self.max_steps}")
+
+        self.total_steps += 1
 
         if action <= 3:
             # Map the action (element of {0,1,2,3}) to the direction we walk in
@@ -302,7 +320,9 @@ class ForestEnv(gym.Env):
             if self.render_mode == "human":
                 self._render_frame()
 
-            return observation, 0.0, False, False, info
+            truncated = self.total_steps >= self.max_steps
+
+            return observation, 0.0, False, truncated, info
         else:
             # Check if a seedling is already occupying the location
             for seedling in self.seedlings:
@@ -310,7 +330,9 @@ class ForestEnv(gym.Env):
                     seedling.x == self._agent_location[0]
                     and seedling.y == self._agent_location[1]
                 ):
-                    return self._get_obs(), 0, False, False, self._get_info()
+                    truncated = self.total_steps >= self.max_steps
+
+                    return self._get_obs(), 0, False, truncated, self._get_info()
             # Plant a seedling
             # The action is an integer between 4 and 9, which we can use to index the species
             self.seedlings.append(Seedling(action - 4, *self._agent_location))
@@ -349,6 +371,9 @@ class ForestEnv(gym.Env):
 
         # An episode is done iff the agent has planted the max seedlings
         terminated = len(self.seedlings) >= self.num_seedlings
+        if self.total_steps >= self.max_steps:
+            truncated = True
+            terminated = True
         observation = self._get_obs()
         info = self._get_info()
 
@@ -411,8 +436,8 @@ class ForestEnv(gym.Env):
 
             # Check if the simulation was successful
             if result.returncode == 0:
-                print(result.stdout)
-                print(result.stderr)
+                # print(result.stdout)
+                # print(result.stderr)
                 return True
             else:
                 print(f"Simulation failed with return code {result.returncode}")

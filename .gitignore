@@ -11,3 +11,4 @@ __pycache__/
 events.out.*
 *.zip
 *.pyc
+data/process*
