@@ -34,15 +34,15 @@ Thom et al (2022, GCB, 10.1111/gcb.16133) for details on the dataset.-->
         <path>
             <home></home>
             <database></database>
-            <lip>lip</lip>
+            <lip>/home/main/iland-model/data/lip</lip>
             <output>output</output>
         </path>
         <database>
-            <in>all_species_database.sqlite</in>
+            <in>/home/main/iland-model/data/all_species_database.sqlite</in>
             <out>output.sqlite</out>
             <!-- _$date$ -->
             <!--test.sqlite-->
-            <climate>historic_climate.sqlite</climate>
+            <climate>/home/main/iland-model/data/historic_climate.sqlite</climate>
         </database>
         <logging>
             <logTarget>file</logTarget>
@@ -332,7 +332,7 @@ Thom et al (2022, GCB, 10.1111/gcb.16133) for details on the dataset.-->
                 <!-- the 10m stand grid corrected by KB -->
                 <fileName>gis/soid.asc</fileName>
             </standGrid>
-            <DEM>npbg_dem50fix.asc</DEM>
+            <DEM>/home/main/iland-model/data/npbg_dem50fix.asc</DEM>
         </world>
         <site>
             <availableNitrogen>84</availableNitrogen>

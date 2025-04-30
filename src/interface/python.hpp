@@ -11,6 +11,6 @@ class PythonInterface : public QObject
 public:
     PythonInterface();
 public slots:
-    void run(int years); // execute the iLand model
+    void run(QString xml_name, int years); // execute the iLand model
 };
 #endif // PYTHONINTERFACE_H

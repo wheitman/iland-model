@@ -79,51 +79,62 @@
 #include "helper.h"
 #include "xmlhelper.h"
 #include "stdint.h"
+#include <iostream>
 
 #include "settingmetadata.h"
 #include "standstatistics.h"
 #include "scriptglobal.h"
 
-
 #include "outputmanager.h"
 
 // debug macro helpers
-void dbg_helper(const char *where, const char *what,const char* file,int line)
+void dbg_helper(const char *where, const char *what, const char *file, int line)
 {
-    qDebug() << "Warning in " << where << ":"<< what << ". (file: " << file << "line:" << line;
+    qDebug() << "Warning in " << where << ":" << what << ". (file: " << file << "line:" << line;
 }
-void dbg_helper_ext(const char *where, const char *what,const char* file,int line, const QString &s)
+void dbg_helper_ext(const char *where, const char *what, const char *file, int line, const QString &s)
 {
-    qDebug() << "Warning in " << where << ":"<< what << ". (file: " << file << "line:" << line << "more:" << s;
+    qDebug() << "Warning in " << where << ":" << what << ". (file: " << file << "line:" << line << "more:" << s;
 }
 
-static int _loglevel=0;
- // true, if detailed debug information is logged
+static int _loglevel = 0;
+// true, if detailed debug information is logged
 bool logLevelDebug()
 {
-    return _loglevel<1;
+    return _loglevel < 1;
 }
 
 // true, if only important aggreate info is logged
 bool logLevelInfo()
 {
-    return _loglevel<2;
+    return _loglevel < 2;
 }
 
 // true if only severe warnings/errors are logged.
 bool logLevelWarning()
 {
-    return _loglevel<3;
+    return _loglevel < 3;
 }
 void setLogLevel(int loglevel)
 {
-    _loglevel=loglevel;
-    switch (loglevel) {
-    case 0: qDebug() << "Loglevel set to Debug."; break;
-    case 1: qDebug() << "Loglevel set to Info."; break;
-    case 2: qDebug() << "Loglevel set to Warning."; break;
-    case 3: qDebug() << "Loglevel set to Error/Quiet."; break;
-    default: qDebug() << "invalid log level" << loglevel; break;
+    _loglevel = loglevel;
+    switch (loglevel)
+    {
+    case 0:
+        qDebug() << "Loglevel set to Debug.";
+        break;
+    case 1:
+        qDebug() << "Loglevel set to Info.";
+        break;
+    case 2:
+        qDebug() << "Loglevel set to Warning.";
+        break;
+    case 3:
+        qDebug() << "Loglevel set to Error/Quiet.";
+        break;
+    default:
+        qDebug() << "invalid log level" << loglevel;
+        break;
     }
 }
 
@@ -138,9 +149,7 @@ GlobalSettings::GlobalSettings()
     // create output manager
     mOutputManager = new OutputManager();
     mScriptEngine = nullptr;
-
 }
-
 
 GlobalSettings::~GlobalSettings()
 {
@@ -195,14 +204,15 @@ void GlobalSettings::setDebugOutput(const GlobalSettings::DebugOutputs dbg, cons
 // storing the names of debug outputs
 //    enum DebugOutputs { dTreeNPP=1, dTreePartition=2, dTreeGrowth=4,
 // dStandNPP=8, dWaterCycle=16, dDailyResponses=32, dEstablishment=64, dCarbonCycle=128 }; ///< defines available debug output types.
-const QStringList debug_output_names=QStringList() << "treeNPP" << "treePartition" << "treeGrowth" << "waterCycle" << "dailyResponse" << "establishment" << "carbonCycle" << "performance";
+const QStringList debug_output_names = QStringList() << "treeNPP" << "treePartition" << "treeGrowth" << "waterCycle" << "dailyResponse" << "establishment" << "carbonCycle" << "performance";
 
 ///< returns the name attached to 'd' or an empty string if not found
 QString GlobalSettings::debugOutputName(const DebugOutputs d)
 {
     // this is a little hacky...(and never really tried!)
-    for (int i=0;i<debug_output_names.count();++i) {
-        if (d & (2<<i))
+    for (int i = 0; i < debug_output_names.count(); ++i)
+    {
+        if (d & (2 << i))
             return debug_output_names[i];
     }
     return QString();
@@ -212,11 +222,10 @@ QString GlobalSettings::debugOutputName(const DebugOutputs d)
 GlobalSettings::DebugOutputs GlobalSettings::debugOutputId(const QString debug_name)
 {
     int index = debug_output_names.indexOf(debug_name);
-    if (index==-1) return GlobalSettings::DebugOutputs(0);
+    if (index == -1)
+        return GlobalSettings::DebugOutputs(0);
     return GlobalSettings::DebugOutputs(2 << index); // 1,2,4,8, ...
 }
-
-
 
 void GlobalSettings::clearDebugLists()
 {
@@ -237,31 +246,35 @@ DebugList &GlobalSettings::debugList(const int ID, const DebugOutputs dbg)
     QMultiHash<int, DebugList>::iterator newitem = mDebugLists.insert(id, dbglist);
     return *newitem;
 }
-bool debuglist_sorter (const DebugList *i,const DebugList *j)
+bool debuglist_sorter(const DebugList *i, const DebugList *j)
 {
     return ((*i)[0].toInt() < (*j)[0].toInt());
 }
-const QList<const DebugList*> GlobalSettings::debugLists(const int ID, const DebugOutputs dbg)
+const QList<const DebugList *> GlobalSettings::debugLists(const int ID, const DebugOutputs dbg)
 {
-    QList<const DebugList*> result_list;
-    if (ID==-1) {
-        foreach(const DebugList &list, mDebugLists)
-            if (list.count()>2)  // contains data
-                if (int(dbg)==-1 || (list[1]).toInt() & int(dbg) ) // type fits or is -1 for all
+    QList<const DebugList *> result_list;
+    if (ID == -1)
+    {
+        foreach (const DebugList &list, mDebugLists)
+            if (list.count() > 2)                                   // contains data
+                if (int(dbg) == -1 || (list[1]).toInt() & int(dbg)) // type fits or is -1 for all
                     result_list << &list;
-    } else {
+    }
+    else
+    {
         // search a specific id
         QMultiHash<int, DebugList>::const_iterator res = mDebugLists.find(ID);
-        while (res != mDebugLists.end() && res.key() == ID)  {
+        while (res != mDebugLists.end() && res.key() == ID)
+        {
             const DebugList &list = res.value();
-            if (list.count()>2)  // contains data
-                if (int(dbg)==-1 || (list[1]).toInt() & int(dbg) ) // type fits or is -1 for all
+            if (list.count() > 2)                                   // contains data
+                if (int(dbg) == -1 || (list[1]).toInt() & int(dbg)) // type fits or is -1 for all
                     result_list << &list;
             ++res;
         }
     }
     // sort result list
-    //std::sort(result_list.begin(), result_list.end(), debuglist_sorter); // changed because of compiler warnings
+    // std::sort(result_list.begin(), result_list.end(), debuglist_sorter); // changed because of compiler warnings
     std::sort(result_list.begin(), result_list.end(), debuglist_sorter);
     return result_list;
 }
@@ -269,55 +282,65 @@ const QList<const DebugList*> GlobalSettings::debugLists(const int ID, const Deb
 QStringList GlobalSettings::debugListCaptions(const DebugOutputs dbg)
 {
     QStringList treeCaps = QStringList() << "Id" << "Species" << "Dbh" << "Height" << "x" << "y" << "ru_index" << "LRI"
-                           << "mWoody" << "mRoot" << "mFoliage" << "LA";
-    if ( int(dbg)==0)
+                                         << "mWoody" << "mRoot" << "mFoliage" << "LA";
+    if (int(dbg) == 0)
         return treeCaps;
-    switch(dbg) {
-    case dTreeNPP: return QStringList() << "id" << "type" << "year" << treeCaps
-                                        << "LRI_modRU" <<"lightResponse" << "effective_area" << "raw_gpp" << "gpp" << "npp" << "aging";
+    switch (dbg)
+    {
+    case dTreeNPP:
+        return QStringList() << "id" << "type" << "year" << treeCaps
+                             << "LRI_modRU" << "lightResponse" << "effective_area" << "raw_gpp" << "gpp" << "npp" << "aging";
 
-    case dTreeGrowth: return QStringList() << "id" << "type" << "year" <<  treeCaps
-                                           << "netNPPStem" << "massStemOld" << "hd_growth" << "factor_diameter" << "delta_d_estimate" << "d_increment";
+    case dTreeGrowth:
+        return QStringList() << "id" << "type" << "year" << treeCaps
+                             << "netNPPStem" << "massStemOld" << "hd_growth" << "factor_diameter" << "delta_d_estimate" << "d_increment";
 
-    case dTreePartition: return QStringList() << "id" << "type" << "year" << treeCaps << "mFineroot" << "mBranch"
-                                              << "npp_kg" << "apct_foliage" << "apct_wood" << "apct_root"
-                                              << "delta_foliage" << "delta_woody" << "delta_root" << "biomass_loss"
-                                              << "mNPPReserve" << "netStemInc" << "stress_index";
+    case dTreePartition:
+        return QStringList() << "id" << "type" << "year" << treeCaps << "mFineroot" << "mBranch"
+                             << "npp_kg" << "apct_foliage" << "apct_wood" << "apct_root"
+                             << "delta_foliage" << "delta_woody" << "delta_root" << "biomass_loss"
+                             << "mNPPReserve" << "netStemInc" << "stress_index";
 
-    case dStandGPP: return QStringList() << "id" << "type" << "year" << "species" << "RU_index" << "rid" << "lai" << "gpp_kg_m2" << "gpp_kg" << "avg_aging" << "f_env_yr";
+    case dStandGPP:
+        return QStringList() << "id" << "type" << "year" << "species" << "RU_index" << "rid" << "lai" << "gpp_kg_m2" << "gpp_kg" << "avg_aging" << "f_env_yr";
 
-    case dWaterCycle: return QStringList() << "id" << "type" << "year" << "date" << "ruindex" << "rid" << "temp" << "vpd" << "prec" << "rad" << "combined_response"
-                                           << "after_intercept" << "after_snow" << "et_canopy" << "evapo_intercepted"
-                                           << "content" << "psi_kpa" << "excess_mm" << "snow_height" << "lai_effective"
-                                              // permafrost details
-                                           << "pftop" << "pfbottom" << "pffreezeback" << "delta_mm" << "delta_soil" << "thermalConductivity"
-                                           << "soilfrozen" << "waterfrozen" << "current_capacity"
-                                           << "moss_fLight" << "moss_fDecid";
+    case dWaterCycle:
+        return QStringList() << "id" << "type" << "year" << "date" << "ruindex" << "rid" << "temp" << "vpd" << "prec" << "rad" << "combined_response"
+                             << "after_intercept" << "after_snow" << "et_canopy" << "evapo_intercepted"
+                             << "content" << "psi_kpa" << "excess_mm" << "snow_height" << "lai_effective"
+                             // permafrost details
+                             << "pftop" << "pfbottom" << "pffreezeback" << "delta_mm" << "delta_soil" << "thermalConductivity"
+                             << "soilfrozen" << "waterfrozen" << "current_capacity"
+                             << "moss_fLight" << "moss_fDecid";
 
-    case dDailyResponses: return QStringList() << "id" << "type" << "year" << "species" << "date" << "RU_index" << "rid"
-                                               << "waterResponse" << "tempResponse" << "VpdResponse" << "Radiation of day" << "util.Radiation";
+    case dDailyResponses:
+        return QStringList() << "id" << "type" << "year" << "species" << "date" << "RU_index" << "rid"
+                             << "waterResponse" << "tempResponse" << "VpdResponse" << "Radiation of day" << "util.Radiation";
 
-    case dEstablishment: return QStringList() << "id" << "type" << "year" << "species" << "RU_index" << "rid"
-                                              << "avgProbDensity" << "TACAminTemp" << "TACAchill" << "TACAfrostFree" << "TACAgdd" << "TACAFrostAfterBud" << "waterLimitation" << "GDD" << "TACAAbioticEnv"
-                                              << "fEnvYr" <<"N_Established" ;
+    case dEstablishment:
+        return QStringList() << "id" << "type" << "year" << "species" << "RU_index" << "rid"
+                             << "avgProbDensity" << "TACAminTemp" << "TACAchill" << "TACAfrostFree" << "TACAgdd" << "TACAFrostAfterBud" << "waterLimitation" << "GDD" << "TACAAbioticEnv"
+                             << "fEnvYr" << "N_Established";
 
-    case dSaplingGrowth: return QStringList() << "id" << "type" << "year" << "species" << "RU_index" << "rid"
-                                              << "Living_cohorts" << "averageHeight" << "averageAge" << "avgDeltaHPot" << "avgDeltaHRealized"
-                                              << "added" << "addedVegetative" << "died" << "recruited" << "refRatio"
-                                              << "carbonLiving" << "carbonGain";
+    case dSaplingGrowth:
+        return QStringList() << "id" << "type" << "year" << "species" << "RU_index" << "rid"
+                             << "Living_cohorts" << "averageHeight" << "averageAge" << "avgDeltaHPot" << "avgDeltaHRealized"
+                             << "added" << "addedVegetative" << "died" << "recruited" << "refRatio"
+                             << "carbonLiving" << "carbonGain";
 
-    case dCarbonCycle: return QStringList() << "id" << "type" << "year" << "RU_index" << "rid"
-                                            << "SnagState_c" << "TotalC_in" << "TotalC_toAtm" << "SWDtoDWD_c" << "SWDtoDWD_n" << "toLabile_c" << "toLabile_n" << "toRefr_c" << "toRefr_n"
-                                            << "swd1_c" << "swd1_n" << "swd1_count" << "swd1_tsd" << "toSwd1_c" << "toSwd1_n" << "dbh1" << "height1" << "volume1"  // pool of small dbhs
-                                            << "swd2_c" << "swd2_n" << "swd2_count" << "swd2_tsd" << "toSwd2_c" << "toSwd2_n" << "dbh2" << "height2" << "volume2"   // standing woody debris medium dbhs
-                                            << "swd3_c" << "swd3_n" << "swd3_count" << "swd3_tsd" << "toSwd3_c" << "toSwd3_n" << "dbh3" << "height3" << "volume3"   // large trees
-                                            << "otherWood1_c" << "otherWood1_n" << "otherWood2_c" << "otherWood2_n" << "otherWood3_c" << "otherWood3_n" << "otherWood4_c" << "otherWood4_n" << "otherWood5_c" << "otherWood5_n"
-                                            << "iLabC" << "iLabN" << "iKyl" << "iRefC" << "iRefN" << "iKyr" << "re" << "kyl" << "kyr" << "ylC" << "ylN" << "yrC" << "yrN" << "somC" << "somN"
-                                            << "NAvailable" << "NAVLab" << "NAVRef" << "NAVSom";
-    case dPerformance: return QStringList() << "id" << "type" << "year" << "treeCount" << "saplingCount" << "newSaplings" << "management"
-                                            << "applyPattern" << "readPattern" << "treeGrowth" << "seedDistribution" <<  "establishment"<< "saplingGrowth" << "carbonCycle"
-                                            << "writeOutput" << "totalYear";
-
+    case dCarbonCycle:
+        return QStringList() << "id" << "type" << "year" << "RU_index" << "rid"
+                             << "SnagState_c" << "TotalC_in" << "TotalC_toAtm" << "SWDtoDWD_c" << "SWDtoDWD_n" << "toLabile_c" << "toLabile_n" << "toRefr_c" << "toRefr_n"
+                             << "swd1_c" << "swd1_n" << "swd1_count" << "swd1_tsd" << "toSwd1_c" << "toSwd1_n" << "dbh1" << "height1" << "volume1" // pool of small dbhs
+                             << "swd2_c" << "swd2_n" << "swd2_count" << "swd2_tsd" << "toSwd2_c" << "toSwd2_n" << "dbh2" << "height2" << "volume2" // standing woody debris medium dbhs
+                             << "swd3_c" << "swd3_n" << "swd3_count" << "swd3_tsd" << "toSwd3_c" << "toSwd3_n" << "dbh3" << "height3" << "volume3" // large trees
+                             << "otherWood1_c" << "otherWood1_n" << "otherWood2_c" << "otherWood2_n" << "otherWood3_c" << "otherWood3_n" << "otherWood4_c" << "otherWood4_n" << "otherWood5_c" << "otherWood5_n"
+                             << "iLabC" << "iLabN" << "iKyl" << "iRefC" << "iRefN" << "iKyr" << "re" << "kyl" << "kyr" << "ylC" << "ylN" << "yrC" << "yrN" << "somC" << "somN"
+                             << "NAvailable" << "NAVLab" << "NAVRef" << "NAVSom";
+    case dPerformance:
+        return QStringList() << "id" << "type" << "year" << "treeCount" << "saplingCount" << "newSaplings" << "management"
+                             << "applyPattern" << "readPattern" << "treeGrowth" << "seedDistribution" << "establishment" << "saplingGrowth" << "carbonCycle"
+                             << "writeOutput" << "totalYear";
     }
     return QStringList() << "invalid debug output!";
 }
@@ -329,36 +352,45 @@ QStringList GlobalSettings::debugDataTable(GlobalSettings::DebugOutputs type,
 {
 
     GlobalSettings *g = GlobalSettings::instance();
-    QList<const DebugList*> ddl = g->debugLists(-1, type); // get all debug data
+    QList<const DebugList *> ddl = g->debugLists(-1, type); // get all debug data
 
     QStringList result;
-    if (ddl.count()==0)
+    if (ddl.count() == 0)
         return result;
 
     QFile out_file(fileName);
     QTextStream ts;
-    if (!fileName.isEmpty()) {
-        if (do_append) {
-            if (out_file.open(QFile::Append)) {
+    if (!fileName.isEmpty())
+    {
+        if (do_append)
+        {
+            if (out_file.open(QFile::Append))
+            {
                 ts.setDevice(&out_file);
             }
-        } else {
-            if (out_file.open(QFile::WriteOnly)) {
+        }
+        else
+        {
+            if (out_file.open(QFile::WriteOnly))
+            {
                 ts.setDevice(&out_file);
                 ts << g->debugListCaptions(type).join(separator) << Qt::endl;
-            } else {
+            }
+            else
+            {
                 qDebug() << "Cannot open debug output file" << fileName;
             }
         }
-
     }
 
-    for (int i=ddl.count()-1; i>=0; --i) {
+    for (int i = ddl.count() - 1; i >= 0; --i)
+    {
         QString line;
-        int c=0;
-        foreach(const QVariant &value, *ddl.at(i)) {
+        int c = 0;
+        foreach (const QVariant &value, *ddl.at(i))
+        {
             if (c++)
-                line+=separator;
+                line += separator;
             line += value.toString();
         }
         // save data to the file, or to the
@@ -368,41 +400,42 @@ QStringList GlobalSettings::debugDataTable(GlobalSettings::DebugOutputs type,
             result << line;
     }
     if (!result.isEmpty())
-        result.push_front( g->debugListCaptions(type).join(separator) );
+        result.push_front(g->debugListCaptions(type).join(separator));
 
     return result;
 }
 
-QList<QPair<QString, QVariant> > GlobalSettings::debugValues(const int ID)
+QList<QPair<QString, QVariant>> GlobalSettings::debugValues(const int ID)
 {
 
-    QList<QPair<QString, QVariant> > result;
+    QList<QPair<QString, QVariant>> result;
     QMultiHash<int, DebugList>::iterator res = mDebugLists.find(ID);
-    while (res != mDebugLists.end() && res.key() == ID)  {
+    while (res != mDebugLists.end() && res.key() == ID)
+    {
         DebugList &list = res.value();
-        if (list.count()>2) { // contains data
-           QStringList cap = debugListCaptions( DebugOutputs(list[1].toInt()) );
-           result.append(QPair<QString, QVariant>("Debug data", "Debug data") );
-           int first_index = 3;
-           if (list[3]=="Id")  // skip default data fields (not needed for drill down)
-               first_index=14;
-           for (int i=first_index;i<list.count();++i)
-               result.append(QPair<QString, QVariant>(cap[i], list[i]));
+        if (list.count() > 2)
+        { // contains data
+            QStringList cap = debugListCaptions(DebugOutputs(list[1].toInt()));
+            result.append(QPair<QString, QVariant>("Debug data", "Debug data"));
+            int first_index = 3;
+            if (list[3] == "Id") // skip default data fields (not needed for drill down)
+                first_index = 14;
+            for (int i = first_index; i < list.count(); ++i)
+                result.append(QPair<QString, QVariant>(cap[i], list[i]));
         }
         ++res;
     }
     return result;
 }
 
-
-QString childText(QDomElement &elem, const QString &name, const QString &def="") {
+QString childText(QDomElement &elem, const QString &name, const QString &def = "")
+{
     QDomElement e = elem.firstChildElement(name);
     if (elem.isNull())
         return def;
     else
         return e.text();
 }
-
 
 void GlobalSettings::clearDatabaseConnections()
 {
@@ -411,13 +444,13 @@ void GlobalSettings::clearDatabaseConnections()
     QSqlDatabase::removeDatabase("climate");
 }
 
-bool GlobalSettings::setupDatabaseConnection(const QString& dbname, const QString &fileName, bool fileMustExist)
+bool GlobalSettings::setupDatabaseConnection(const QString &dbname, const QString &fileName, bool fileMustExist)
 {
 
-    //QSqlDatabase::database(dbname).close(); // close database
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",dbname); // addDatabase replaces a connection with the same name
+    // QSqlDatabase::database(dbname).close(); // close database
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", dbname); // addDatabase replaces a connection with the same name
     qDebug() << "setup database connection" << dbname << "to" << fileName;
-    //db.setDatabaseName(":memory:");
+    // db.setDatabaseName(":memory:");
     if (fileMustExist)
         if (!QFile::exists(fileName))
             throw IException("Error setting up database connection: file " + fileName + " does not exist!");
@@ -425,10 +458,12 @@ bool GlobalSettings::setupDatabaseConnection(const QString& dbname, const QStrin
     if (fileMustExist)
         db.setConnectOptions("QSQLITE_OPEN_READONLY"); // connect as read only
 
-    if (!db.open()) {
+    if (!db.open())
+    {
         throw IException(QString("Error in setting up the database connection <%2> connection to file %1.\n").arg(fileName, dbname));
     }
-    if (!fileMustExist) {
+    if (!fileMustExist)
+    {
         // for output databases:
         // some special commands (pragmas: see also: http://www.sqlite.org/pragma.html)
         // db.exec("pragma temp_store(2)"); // temp storage in memory
@@ -442,13 +477,12 @@ bool GlobalSettings::setupDatabaseConnection(const QString& dbname, const QStrin
     return true;
 }
 
-
 ///////// Path functions
 void GlobalSettings::printDirectories() const
 {
     qDebug() << "current File Paths:";
     QHash<QString, QString>::const_iterator i;
-    for (i=mFilePath.constBegin(); i!=mFilePath.constEnd(); ++i)
+    for (i = mFilePath.constBegin(); i != mFilePath.constEnd(); ++i)
         qDebug() << i.key() << ": " << i.value();
 }
 
@@ -474,7 +508,8 @@ void GlobalSettings::setupDirectories(QDomElement pathNode, const QString &proje
   */
 QString GlobalSettings::path(const QString &fileName, const QString &type)
 {
-    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty())
+    {
         QFileInfo fileinfo(fileName);
         if (fileinfo.isAbsolute())
             return QDir::cleanPath(fileName);
@@ -483,7 +518,8 @@ QString GlobalSettings::path(const QString &fileName, const QString &type)
     QDir d;
     if (mFilePath.contains(type))
         d.setPath(mFilePath.value(type));
-    else {
+    else
+    {
         qDebug() << "GlobalSettings::path() called with unknown type" << type;
         d = QDir::currentPath();
     }
@@ -496,21 +532,22 @@ bool GlobalSettings::fileExists(const QString &fileName, const QString &type)
 {
     QString name = path(fileName, type);
 
-    if (!QFile::exists(name)) {
-        qDebug() << "Path" << fileName << "(expanded to:)"<< name << "does not exist!";
+    if (!QFile::exists(name))
+    {
+        qDebug() << "Path" << fileName << "(expanded to:)" << name << "does not exist!";
         return false;
     }
     return true;
 }
 
-
 void GlobalSettings::loadProjectFile(const QString &fileName)
 {
     qDebug() << "Loading Project file" << fileName;
+
+    std::cout << "Loading Project file" << fileName.toStdString() << std::endl;
+
     if (!QFile::exists(fileName))
         throw IException(QString("The project file %1 does not exist!").arg(fileName));
     mXml.loadFromFile(fileName);
-    setupDirectories(mXml.node("system.path"),QFileInfo(fileName).absolutePath());
-
+    setupDirectories(mXml.node("system.path"), QFileInfo(fileName).absolutePath());
 }
-

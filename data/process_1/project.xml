@@ -1,0 +1,572 @@
+<project>
+    <system>
+        <path>
+            <home />
+            <database />
+            <lip>/home/main/iland-model/data/lip</lip>
+            <output>output</output>
+        </path>
+        <database>
+            <in>/home/main/iland-model/data/all_species_database.sqlite</in>
+            <out>/home/main/iland-model/data/process_1/output.sqlite</out>
+            
+            
+            <climate>/home/main/iland-model/data/historic_climate.sqlite</climate>
+        </database>
+        <logging>
+            <logTarget>file</logTarget>
+            <logFile>log/log.txt</logFile>
+            <flush>false</flush>
+        </logging>
+        <settings>
+            <multithreading>true</multithreading>
+            <debugOutput>0</debugOutput>
+            <debugOutputAutoSave>true</debugOutputAutoSave>
+            <randomSeed>0</randomSeed>
+            <expressionLinearizationEnabled>true</expressionLinearizationEnabled>
+            <logLevel>Info</logLevel>
+            <responsive>false</responsive>
+            <threadCount>8</threadCount>
+        </settings>
+        <javascript>
+            <fileName />
+        </javascript>
+    </system>
+    <model>
+        <settings>
+            <regenerationEnabled>true</regenerationEnabled>
+            <mortalityEnabled>true</mortalityEnabled>
+            <growthEnabled>true</growthEnabled>
+            <carbonCycleEnabled>true</carbonCycleEnabled>
+            <epsilon>2.7</epsilon>
+            <lightExtinctionCoefficient>0.6</lightExtinctionCoefficient>
+            <lightExtinctionCoefficientOpacity>0.6</lightExtinctionCoefficientOpacity>
+            <temperatureTau>6</temperatureTau>
+            <airDensity>1.204</airDensity>
+            <laiThresholdForClosedStands>3</laiThresholdForClosedStands>
+            <boundaryLayerConductance>0.2</boundaryLayerConductance>
+            
+            <interceptionStorageNeedle>4</interceptionStorageNeedle>
+            
+            <interceptionStorageBroadleaf>2</interceptionStorageBroadleaf>
+            
+            <snowMeltTemperature>0</snowMeltTemperature>
+            <waterUseSoilSaturation>false</waterUseSoilSaturation>
+            
+            <usePARFractionBelowGroundAllocation>true</usePARFractionBelowGroundAllocation>
+            <groundVegetationLAI>1</groundVegetationLAI>
+            <groundVegetationPsiMin>-1.5</groundVegetationPsiMin>
+            <snowDensity>300</snowDensity>
+            <snowInitialDepth>0</snowInitialDepth>
+            <seedDispersal>
+                <seedBelt>
+                    
+                    <enabled>false</enabled>
+                    <width>5</width>
+                    <sizeX>5</sizeX>
+                    <sizeY>2</sizeY>
+                    
+                    <species_0_1>abal 0.3 piab 0.3 lade 0.1 pisy 0.05 fasy 0.4 quro 0.01 acps 0.15
+                        frex 0.12 cabe 0.01 bepe 0.003 alin 0.01 qupe 0.01 algl 0.003 casa 0.003
+                        pini 0.05 acca 0.003 acpl 0.003 qupu 0.003 pice 0.003 soau 0.003 soar 0.01
+                        coav 0.003 alvi 0.003 potr 0.003 poni 0.001 tico 0.003 tipl 0.003 ulgl 0.12
+                        saca 0.003</species_0_1>
+                    
+                    <species_1_1>abal 0.1 piab 0.1 lade 0.1 pisy 0.07 fasy 0.8 quro 0.15 acps 0.15
+                        frex 0.15 cabe 0.03 bepe 0.003 alin 0.003 qupe 0.15 algl 0.003 casa 0.1 pini
+                        0.07 acca 0.003 acpl 0.003 qupu 0.03 pice 0.003 soau 0.003 soar 0.05 coav
+                        0.03 alvi 0.003 potr 0.003 poni 0.001 tico 0.03 tipl 0.03 ulgl 0.1 saca
+                        0.003</species_1_1>
+                    
+                    <species_2_1>abal 0.1 piab 0.1 lade 0.1 pisy 0.07 fasy 0.8 quro 0.15 acps 0.15
+                        frex 0.15 cabe 0.03 bepe 0.003 alin 0.003 qupe 0.15 algl 0.003 casa 0.1 pini
+                        0.07 acca 0.003 acpl 0.003 qupu 0.03 pice 0.003 soau 0.003 soar 0.05 coav
+                        0.03 alvi 0.003 potr 0.003 poni 0.001 tico 0.03 tipl 0.03 ulgl 0.1 saca
+                        0.003</species_2_1>
+                    
+                    <species_3_1>abal 0.1 piab 0.1 lade 0.1 pisy 0.07 fasy 0.8 quro 0.15 acps 0.15
+                        frex 0.15 cabe 0.03 bepe 0.003 alin 0.003 qupe 0.15 algl 0.003 casa 0.1 pini
+                        0.07 acca 0.003 acpl 0.003 qupu 0.03 pice 0.003 soau 0.003 soar 0.05 coav
+                        0.03 alvi 0.003 potr 0.003 poni 0.001 tico 0.03 tipl 0.03 ulgl 0.1 saca
+                        0.003</species_3_1>
+                    
+                    <species_4_1>abal 0.3 piab 0.3 lade 0.1 pisy 0.05 fasy 0.4 quro 0.01 acps 0.15
+                        frex 0.12 cabe 0.01 bepe 0.003 alin 0.01 qupe 0.01 algl 0.003 casa 0.003
+                        pini 0.05 acca 0.003 acpl 0.003 qupu 0.003 pice 0.003 soau 0.003 soar 0.01
+                        coav 0.003 alvi 0.003 potr 0.003 poni 0.001 tico 0.003 tipl 0.003 ulgl 0.12
+                        saca 0.003</species_4_1>
+                    
+                    <species_0_0>abal 0.3 piab 0.3 lade 0.1 pisy 0.05 fasy 0.4 quro 0.01 acps 0.15
+                        frex 0.12 cabe 0.01 bepe 0.003 alin 0.01 qupe 0.01 algl 0.003 casa 0.003
+                        pini 0.05 acca 0.003 acpl 0.003 qupu 0.003 pice 0.003 soau 0.003 soar 0.01
+                        coav 0.003 alvi 0.003 potr 0.003 poni 0.001 tico 0.003 tipl 0.003 ulgl 0.12
+                        saca 0.003</species_0_0>
+                    
+                    <species_1_0>abal 0.003 piab 0.01 lade 0.3 pisy 0.003 fasy 0.003 quro 0.003 acps
+                        0.003 frex 0.003 cabe 0.003 bepe 0.003 alin 0.003 qupe 0.003 algl 0.003 casa
+                        0.003 pini 0.003 acca 0.003 acpl 0.003 qupu 0.003 pice 0.3 soau 0.003 soar
+                        0.003 coav 0.003 alvi 0.003 potr 0.003 poni 0.003 tico 0.003 tipl 0.003 ulgl
+                        0.003 saca 0.003</species_1_0>
+                    
+                    <species_2_0>abal 0.003 piab 0.01 lade 0.3 pisy 0.003 fasy 0.003 quro 0.003 acps
+                        0.003 frex 0.003 cabe 0.003 bepe 0.003 alin 0.003 qupe 0.003 algl 0.003 casa
+                        0.003 pini 0.003 acca 0.003 acpl 0.003 qupu 0.003 pice 0.3 soau 0.003 soar
+                        0.003 coav 0.003 alvi 0.003 potr 0.003 poni 0.003 tico 0.003 tipl 0.003 ulgl
+                        0.003 saca 0.003 pimu 0.05</species_2_0>
+                    
+                    <species_3_0>abal 0.003 piab 0.01 lade 0.3 pisy 0.003 fasy 0.003 quro 0.003 acps
+                        0.003 frex 0.003 cabe 0.003 bepe 0.003 alin 0.003 qupe 0.003 algl 0.003 casa
+                        0.003 pini 0.003 acca 0.003 acpl 0.003 qupu 0.003 pice 0.3 soau 0.003 soar
+                        0.003 coav 0.003 alvi 0.003 potr 0.003 poni 0.003 tico 0.003 tipl 0.003 ulgl
+                        0.003 saca 0.003</species_3_0>
+                    
+                    <species_4_0>abal 0.3 piab 0.3 lade 0.1 pisy 0.05 fasy 0.4 quro 0.01 acps 0.15
+                        frex 0.12 cabe 0.01 bepe 0.003 alin 0.01 qupe 0.01 algl 0.003 casa 0.003
+                        pini 0.05 acca 0.003 acpl 0.003 qupu 0.003 pice 0.003 soau 0.003 soar 0.01
+                        coav 0.003 alvi 0.003 potr 0.003 poni 0.001 tico 0.003 tipl 0.003 ulgl 0.12
+                        saca 0.003</species_4_0>
+                </seedBelt>
+                <dumpSeedMapsEnabled>false</dumpSeedMapsEnabled>
+                <dumpSeedMapsPath />
+                <externalSeedEnabled>false</externalSeedEnabled>
+                <externalSeedBackgroundInput />
+                <externalSeedSource />
+                
+                <externalSeedSpecies>abal, piab, lade, pisy, fasy, quro, acps, frex, cabe, bepe,
+                    alin, qupe, algl, casa, pini, acca, acpl, qupu, pice, soau, soar, coav, alvi,
+                    potr, poni, tico, tipl, ulgl, saca, pimu</externalSeedSpecies>
+                
+                <externalSeedBuffer />
+                <recruitmentDimensionVariation>0.1</recruitmentDimensionVariation>
+                <longDistanceDispersal>
+                    <rings />
+                    <thresholdArea>0.0001</thresholdArea>
+                    <thresholdLDD>0.0000001</thresholdLDD>
+                    <LDDSeedlings>0.5</LDDSeedlings>
+                </longDistanceDispersal>
+            </seedDispersal>
+            <soil>
+                
+                <qb>5</qb>
+                
+                <qh>14.5</qh>
+                
+                <leaching>0.47</leaching>
+                
+                <el>0.152</el>
+                
+                <er>0.319</er>
+                
+                <swdDBHClass12>20</swdDBHClass12>
+                
+                <swdDBHClass23>100</swdDBHClass23>
+                
+                <useDynamicAvailableNitrogen>false</useDynamicAvailableNitrogen>
+                
+                <nitrogenDeposition>21.8</nitrogenDeposition>
+            </soil>
+            <grass>
+                <enabled>false</enabled>
+                
+                <type>pixel</type>
+                
+                <grassDuration>polygon(x, 0,0, 6,0, 6,1, 30,1, 30,0)</grassDuration>
+                <LIFThreshold>0.2</LIFThreshold>
+                <grassPotential>polygon(0.9999*x^0.15)</grassPotential>
+                <maxTimeLag>3</maxTimeLag>
+                <grassEffect>polygon(0.9999*x^0.15)</grassEffect>
+            </grass>
+            <permafrost>
+                <enabled>false</enabled>
+            </permafrost>
+            <browsing>
+                <enabled>false</enabled>
+                
+                <browsingPressure>1</browsingPressure>
+            </browsing>
+            <svdStates>
+                <enabled>false</enabled>
+            </svdStates>
+        </settings>
+        <species>
+            <source>species</source>
+            <reader>readerstamp.bin</reader>
+            <nitrogenResponseClasses>
+                <class_1_a>-0.045</class_1_a>
+                <class_1_b>10</class_1_b>
+                <class_2_a>-0.055</class_2_a>
+                <class_2_b>25</class_2_b>
+                <class_3_a>-0.065</class_3_a>
+                <class_3_b>40</class_3_b>
+            </nitrogenResponseClasses>
+            <CO2Response>
+                <p0>1</p0>
+                <baseConcentration>380</baseConcentration>
+                <compensationPoint>80</compensationPoint>
+                <beta0>0.3</beta0>
+            </CO2Response>
+            <lightResponse>
+                <shadeTolerant>min(10*lri,max(0.1613*lri+0.7871,lri))</shadeTolerant>
+                <shadeIntolerant>1-exp(-5.5*(lri-0.05))</shadeIntolerant>
+                <LRImodifier>exp(ln(lri)/0.5*(1-0.5*relH))</LRImodifier>
+            </lightResponse>
+            <phenology>
+                
+                <type id="1">
+                    
+                    <vpdMin>0.9</vpdMin>
+                    <vpdMax>4.1</vpdMax>
+                    <dayLengthMin>10</dayLengthMin>
+                    <dayLengthMax>11</dayLengthMax>
+                    <tempMin>-2</tempMin>
+                    <tempMax>5</tempMax>
+                </type>
+                <type id="2">
+                    
+                    <vpdMin>1</vpdMin>
+                    <vpdMax>4.1</vpdMax>
+                    <dayLengthMin>10</dayLengthMin>
+                    <dayLengthMax>11</dayLengthMax>
+                    <tempMin>-4</tempMin>
+                    <tempMax>3</tempMax>
+                </type>
+            </phenology>
+            <sprouting>
+                <adultSproutProbability>pimu 0.1</adultSproutProbability>
+            </sprouting>
+        </species>
+        <world>
+            <cellSize>2</cellSize>
+            
+            <width>100</width>
+            
+            <height>100</height>
+            <buffer>200</buffer>
+
+            
+            <latitude>40.44</latitude>
+            <resourceUnitsAsGrid>true</resourceUnitsAsGrid>
+            <environmentEnabled>false</environmentEnabled>
+            <environmentMode>grid</environmentMode>
+            
+            <environmentGrid>gis/objectid.asc</environmentGrid>
+            <environmentFile>gis/environment.txt</environmentFile>
+            <areaMask>
+                <enabled>false</enabled>
+                <imageFile>AFJZ_mask.png</imageFile>
+            </areaMask>
+            <timeEventsEnabled>false</timeEventsEnabled>
+            
+            <timeEventsFile>scripts/timeevents_base_1.txt</timeEventsFile>
+            <location>
+                
+                
+                <x>4559008</x>
+                
+                <y>5267625</y>
+                <z>0</z>
+                <rotation>0</rotation>
+            </location>
+            <standGrid>
+                <enabled>false</enabled>
+                
+                <fileName>gis/soid.asc</fileName>
+            </standGrid>
+            <DEM>/home/main/iland-model/data/npbg_dem50fix.asc</DEM>
+        </world>
+        <site>
+            <availableNitrogen>84</availableNitrogen>
+            
+            <soilDepth>38</soilDepth>
+            
+            <pctSand>9</pctSand>
+            <pctSilt>53</pctSilt>
+            <pctClay>38</pctClay>
+            <youngLabileC>12375</youngLabileC>
+            <youngLabileN>652.1</youngLabileN>
+            <youngLabileDecompRate>0.227</youngLabileDecompRate>
+            <youngRefractoryC>33832</youngRefractoryC>
+            <youngRefractoryN>121.2</youngRefractoryN>
+            <youngRefractoryDecompRate>0.071</youngRefractoryDecompRate>
+            <youngLabileAbovegroundFraction>0.7</youngLabileAbovegroundFraction>
+            <youngRefractoryAbovegroundFraction>0.7</youngRefractoryAbovegroundFraction>
+            <somC>128666</somC>
+            <somN>83.68</somN>
+            <somDecompRate>0.011656</somDecompRate>
+            <soilHumificationRate>0.2992</soilHumificationRate>
+        </site>
+        <climate>
+            <co2concentration>380</co2concentration>
+            
+            <co2pathway>No</co2pathway>
+            <co2startYear>2000</co2startYear>
+            <tableName>climate11</tableName>
+            <batchYears>29</batchYears>
+            <temperatureShift>0</temperatureShift>
+            <precipitationShift>1</precipitationShift>
+            <randomSamplingEnabled>true</randomSamplingEnabled>
+            <randomSamplingList>
+                8,13,4,18,0,21,3,18,3,14,3,15,19,17,23,11,11,10,11,5,25,5,14,21,21,9,17,23,25,18,28,3,6,10,8,9,5,0,20,12,2,28,1,0,20,26,27,21,5,12,21,27,11,5,14,27,8,7,1,12,10,25,13,15,7,1,20,13,27,24,7,5,12,14,20,23,6,16,10,12,2,27,1,10,6,28,14,14,23,8,8,9,23,16,8,13,10,9,16,11,5,15,15,0,16,2,2,13,15,26,14,19,19,21,3,24,16,23,14,5,13,26,23,24,6,24,9,22,19,15,19,25,8,8,1,24,12,28,13,24,6,0,9,27,0,19,17,27,4,9,4,5,28,1,28,20,12,1,17,26,19,6,14,21,22,9,21,25,14,9,15,26,22,11,10,17,4,8,20,9,0,17,21,20,2,28,13,20,12,0,26,23,10,13,23,22,19,19,1,0</randomSamplingList>
+            
+            <filter />
+            
+            <microclimate>
+                <enabled>false</enabled>
+            </microclimate>
+        </climate>
+        <initialization>
+            <mode>single</mode>
+            <type>single</type>
+            <randomFunction>max(1-x^2,0)</randomFunction>
+            <file>seedling_init.txt</file>
+            <snags>
+                <swdC>12000</swdC>
+                <swdCN>417.9</swdCN>
+                <swdCount>50</swdCount>
+                <otherC>4000</otherC>
+                <otherCN>22.95</otherCN>
+                <swdDecompRate>0.036</swdDecompRate>
+                <woodDecompRate>0.071</woodDecompRate>
+                <swdHalfLife>13.926</swdHalfLife>
+                <otherAbovegroundFraction>0.2</otherAbovegroundFraction>
+            </snags>
+            <heightGrid>
+                <enabled>false</enabled>
+                <fileName>bg_lidar_ras.asc</fileName>
+                <maxTries>10</maxTries>
+                <fitFormula>polygon(x, 0.8,1, 1,1.1, 1, 1, 1.5,0.8)</fitFormula>
+            </heightGrid>
+        </initialization>
+        <management>
+            <enabled>false</enabled>
+            <file />
+            <abeEnabled>false</abeEnabled>
+            <abe>
+                <file />
+                <agentDataFile />
+            </abe>
+        </management>
+        <parameter>
+            <torus>false</torus>
+            <debug_tree>0</debug_tree>
+            <debug_clear>false</debug_clear>
+            <gpp_per_year>0</gpp_per_year>
+            <debugDumpStamps>false</debugDumpStamps>
+        </parameter>
+    </model>
+    <output>
+        <landscape>
+            <enabled>true</enabled>
+            <condition />
+        </landscape>
+        <dynamicstand>
+            
+            <enabled>true</enabled>
+            
+            <condition>mod(year,10)=0</condition>
+            <conditionRU />
+            <rufilter />
+            <treefilter />
+            <by_species>true</by_species>
+            <by_ru>true</by_ru>
+            <columns>dbh.mean, dbh.sd, dbh.p5, dbh.p95, height.mean, height.sd, age.mean,age.sd,
+                if(height&lt;5,1,0).sum,if(height&gt;5 and height&lt;10,1,0).sum, if(height&gt;10 and
+                height&lt;15,1,0).sum, if(height&gt;15 and height&lt;20,1,0).sum,
+                if(height&gt;20 and height&lt;25,1,0).sum, if(height&gt;25 and height&lt;30,1,0).sum,
+                if(height&gt;30 and height&lt;35,1,0).sum, if(height&gt;35 and height&lt;40,1,0).sum,
+                if(height&gt;40 and height&lt;45,1,0).sum, if(height&gt;45 and height&lt;50,1,0).sum,
+                if(height&gt;=50,1,0).sum</columns>
+        </dynamicstand>
+        <tree>
+            
+            <enabled>true</enabled>
+            
+            <filter />
+        </tree>
+        <treeremoved>
+            
+            <enabled>false</enabled>
+            <filter />
+        </treeremoved>
+        <stand>
+            <enabled>true</enabled>
+            <condition>mod(year,10)=0</condition>
+        </stand>
+        <standdead>
+            <enabled>false</enabled>
+            <condition>mod(year,10)=0</condition>
+        </standdead>
+        <production_month>
+            <enabled>false</enabled>
+        </production_month>
+        <management>
+            <enabled>false</enabled>
+        </management>
+        <sapling>
+            <enabled>false</enabled>
+            <condition />
+        </sapling>
+        <saplingdetail>
+            <enabled>false</enabled>
+            <condition />
+            <minDbh />
+        </saplingdetail>
+        <carbon>
+            <enabled>false</enabled>
+            <condition />
+            <conditionRU>mod(year,10)=0</conditionRU>
+        </carbon>
+        <carbonflow>
+            <enabled>false</enabled>
+            <condition />
+            <conditionRU>mod(year,10)=0</conditionRU>
+        </carbonflow>
+        <dynamic>
+            
+            
+            <enabled>false</enabled>
+            <columns> dbh.mean, dbh.max, dbh.min, dbh.p5, dbh.p25, dbh.p75, dbh.p95, height.mean,
+                height.max, height.min, height.p5,height.p95, height.p25,height.p75, stress.mean,
+                stress.max, if(stress&gt;0,1,0).sum, if(stress&gt;0,stress,0).sum, if(dbh&gt;0,1,0).sum,
+                leafarea.sum,woodymass.sum,rootmass.sum,foliagemass.sum
+            </columns>
+        </dynamic>
+        <water>
+            <enabled>false</enabled>
+            <condition />
+            <conditionRU>in(year, 0,50, 100, 200, 300, 400, 500, 1000)</conditionRU>
+        </water>
+        <landscape_removed>
+            <enabled>false</enabled>
+            <includeHarvest>false</includeHarvest>
+            <includeNatural>false</includeNatural>
+            <dbhClasses />
+            <condition />
+        </landscape_removed>
+        <barkbeetle>
+            <enabled>false</enabled>
+        </barkbeetle>
+        <wind>
+            <enabled>true</enabled>
+        </wind>
+        <fire>
+            <enabled>false</enabled>
+        </fire>
+        <landscape_removed>
+            <enabled>false</enabled>
+            <includeHarvest>false</includeHarvest>
+            <includeNatural>true</includeNatural>
+        </landscape_removed>
+        
+        <abeStand>
+            <enabled>false</enabled>
+        </abeStand>
+        <abeStandDetail>
+            <enabled>false</enabled>
+        </abeStandDetail>
+        <abeUnit>
+            <enabled>false</enabled>
+        </abeUnit>
+        <abeStandRemoval>
+            <enabled>false</enabled>
+        </abeStandRemoval>
+        
+        <svdgpp>
+            <enabled>false</enabled>
+        </svdgpp>
+        <svdindicator>
+            <enabled>false</enabled>
+            <indicators>
+                <shannonIndex>false</shannonIndex>
+                <abovegroundCarbon>false</abovegroundCarbon>
+                <totalCarbon>false</totalCarbon>
+                <volume>false</volume>
+                <crownCover>false</crownCover>
+                <LAI>false</LAI>
+                <basalArea>false</basalArea>
+                <stemDensity>false</stemDensity>
+                <saplingDensity>false</saplingDensity>
+                <speciesProportions>false</speciesProportions>
+                <disturbanceHistory>false</disturbanceHistory>
+            </indicators>
+        </svdindicator>
+        <svdstate>
+            <enabled>false</enabled>
+        </svdstate>
+        <svduniquestate>
+            <enabled>false</enabled>
+            <condition />
+        </svduniquestate>
+        <devstage>
+            
+            <cellsize>50</cellsize>
+            <enabled>false</enabled>
+            
+            <handler>devStage</handler>
+            
+            <filter>mod(year,10)=0</filter>
+            <condition>mod(year,10)=0</condition>
+        </devstage>
+        <ecoviz>
+            <enabled>false</enabled>
+            <condition />
+            <fileName />
+        </ecoviz>
+    </output>
+    <modules>
+        
+
+        <wind>
+            <enabled>true</enabled>
+            
+            <speciesParameter>wind</speciesParameter>
+            
+            <soilFreezeMode>auto</soilFreezeMode>
+            
+            <triggeredByTimeEvent>true</triggeredByTimeEvent>
+            
+            <durationPerIteration>10</durationPerIteration>
+            
+            <gustModifier>0.1</gustModifier>
+            
+            <topoModifier>1</topoModifier>
+            
+            <directionVariation>30</directionVariation>
+            
+            <direction>0</direction>
+            
+            <dayOfYear>0</dayOfYear>
+            
+            <speed>0</speed>
+            
+            <duration>720</duration>
+            <topoGridFile>gis/wind_scale.asc</topoGridFile>
+            
+            <factorEdge>3</factorEdge>
+            
+            <edgeDetectionThreshold>10</edgeDetectionThreshold>
+            
+            <topexModifierType>additive</topexModifierType>
+            
+            <LRITransferFunction>max(min(3.733-6.467*LRI, 3.41),3)</LRITransferFunction>
+            
+            <edgeProbability>polygon(x,0,0,20,0.5)</edgeProbability>
+            
+            <edgeAgeBaseValue>20</edgeAgeBaseValue>
+            
+            <edgeBackgroundProbability>0.1</edgeBackgroundProbability>
+            
+            <onBeforeWind />
+            <onAfterWind />
+        </wind>
+
+        <bite>
+            <enabled>false</enabled>
+        </bite>
+    </modules>
+    <user>
+        
+        <repUsed>1</repUsed>
+        <gcmUsed>whatever</gcmUsed>
+    </user>
+</project>

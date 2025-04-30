@@ -1,7 +1,6 @@
 #include <iostream>
 #include <QCoreApplication>
 
-
 #include "python.hpp"
 
 #include "global.h"
@@ -12,7 +11,7 @@ PythonInterface::PythonInterface()
 {
 }
 
-void PythonInterface::run(int years)
+void PythonInterface::run(QString xml_name, int years)
 {
 
     // QString xml_name = QCoreApplication::arguments().at(1);
@@ -38,7 +37,7 @@ void PythonInterface::run(int years)
         ModelController iland_model;
         GlobalSettings::instance()->setModelController(&iland_model);
         // QObject::connect(&iland_model, SIGNAL(year(int)), SLOT(runYear(int)));
-        iland_model.setFileName("/home/main/iland-model/data/project.xml");
+        iland_model.setFileName(xml_name);
         if (iland_model.hasError())
         {
             qWarning() << "!!!! ERROR !!!!";
@@ -47,6 +46,8 @@ void PythonInterface::run(int years)
             // QCoreApplication::quit();
             return;
         }
+
+        std::cout << "Reading from XML file:" << xml_name.toStdString() << std::endl;
 
         // if (QCoreApplication::arguments().count() > 3)
         // {
@@ -124,7 +125,29 @@ int main(int argc, char *argv[])
 
     std::cout << "Python interface initialized." << std::endl;
 
-    py.run(10); // Run the model for 10 years
+    // Print the xml name passed as the first argument
+    if (argc < 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " <xml_name> [years]" << std::endl;
+        return 1;
+    }
+    QString xml_name = argv[1];
+    std::cout << "XML name: " << xml_name.toStdString() << std::endl;
+
+    // Print the number of years to run passed as the second argument
+    int years = 10; // Default value
+    if (argc > 2)
+    {
+        bool ok;
+        years = QString(argv[2]).toInt(&ok);
+        if (!ok)
+        {
+            std::cerr << "Invalid number of years: " << argv[2] << std::endl;
+            return 1;
+        }
+    }
+
+    py.run(xml_name, years); // Run the model for 10 years
 
     return 0;
 }
