@@ -40,18 +40,34 @@ shortnames = [
 ]
 
 
-def shortname_to_color(shortname: str) -> tuple[int, int, int]:
+def shortname_to_color(shortname: str, cluster: int) -> tuple[int, int, int]:
     """
-    Convert a shortname to a color using a simple hash function.
+    Convert a shortname and cluster to a color using a deterministic hash function.
+    Species with the same cluster should have a similar shade.
     """
-    # Use a simple hash function to convert the shortname to an integer
-    hash_value = hash(shortname) % 256
-    # Map the hash value to a random shade of green
-    return (
-        int(hash_value / 10),
-        hash_value,
-        int(hash_value / 10),
-    )  # RGB format (R, G, B)
+    # Generate a base color for each cluster
+    cluster_colors = {
+        0: (100, 100, 255),  # Blue shades
+        1: (50, 200, 50),  # Green shades
+        2: (200, 50, 50),  # Red shades
+        3: (200, 200, 50),  # Yellow shades
+        4: (200, 100, 200),  # Purple shades
+        5: (50, 200, 200),  # Cyan shades
+    }
+
+    # Use a hash of the shortname to create variation within the cluster
+    hash_val = sum(ord(c) for c in shortname)
+
+    # Get base color for the cluster
+    base_r, base_g, base_b = cluster_colors.get(cluster, (150, 150, 150))
+
+    # Create variations based on species name while keeping the dominant hue
+    variation = 255  # Amount of variation within a cluster
+    r = max(0, min(255, base_r + (hash_val % variation) - variation // 2))
+    g = max(0, min(255, base_g + ((hash_val // 10) % variation) - variation // 2))
+    b = max(0, min(255, base_b + ((hash_val // 100) % variation) - variation // 2))
+
+    return (r, g, b)
 
 
 class Seedling:
@@ -67,10 +83,10 @@ class Seedling:
         ]
 
         # Randomly select a species from the cluster
-        self.species = species_in_cluster.sample(n=1, random_state=64).iloc[0][
-            "shortName"
-        ]
-        self.color = shortname_to_color(self.species)
+        self.species = species_in_cluster.sample(n=1).iloc[0]["shortName"]
+        self.color = shortname_to_color(self.species, cluster)
+
+        print(f"{self.species} ({self.cluster}) has color {self.color}")
 
 
 class GridWorldEnv(gym.Env):
@@ -119,11 +135,20 @@ class GridWorldEnv(gym.Env):
     def _get_obs(self):
         obs = np.zeros((self.size, self.size, 3), dtype=np.uint8)
 
+        # Draw the seedlings
+        for seedling in self.seedlings:
+            obs[seedling.y, seedling.x] = shortname_to_color(
+                seedling.species, seedling.cluster
+            )
+
+        # Now draw the agent as a white pixel
+        obs[self._agent_location[1], self._agent_location[0]] = (255, 255, 255)
+
         return obs
 
     def _get_info(self):
         return {
-            "seedlings": self.seedlings,
+            "seedlings": [seedling.species for seedling in self.seedlings],
         }
 
     def reset(self, seed=None, options=None):
@@ -186,44 +211,23 @@ class GridWorldEnv(gym.Env):
             self.clock = pygame.time.Clock()
 
         canvas = pygame.Surface((self.window_size, self.window_size))
-        canvas.fill((255, 255, 255))
-        pix_square_size = (
-            self.window_size / self.size
-        )  # The size of a single grid square in pixels
 
-        # Now we draw the seedlings
-        for seedling in self.seedlings:
-            pygame.draw.circle(
-                canvas,
-                seedling.color,
-                np.asarray([seedling.x + 0.5, seedling.y + 0.5]) * pix_square_size,
-                pix_square_size / 3,
-            )
+        obs = self._get_obs()
 
-        # Now we draw the agent
-        pygame.draw.circle(
-            canvas,
-            (0, 0, 255),
-            (self._agent_location + 0.5) * pix_square_size,
-            pix_square_size / 3,
-        )
-
-        # Finally, add some gridlines
-        for x in range(self.size + 1):
-            pygame.draw.line(
-                canvas,
-                0,
-                (0, pix_square_size * x),
-                (self.window_size, pix_square_size * x),
-                width=3,
-            )
-            pygame.draw.line(
-                canvas,
-                0,
-                (pix_square_size * x, 0),
-                (pix_square_size * x, self.window_size),
-                width=3,
-            )
+        # Fill the canvas with the observation
+        for y in range(self.size):
+            for x in range(self.size):
+                color = obs[y, x]
+                pygame.draw.rect(
+                    canvas,
+                    color,
+                    (
+                        x * (self.window_size // self.size),
+                        y * (self.window_size // self.size),
+                        self.window_size // self.size,
+                        self.window_size // self.size,
+                    ),
+                )
 
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
@@ -281,11 +285,11 @@ def get_action_from_keyboard_input():
 
 
 if __name__ == "__main__":
-    env = GridWorldEnv(render_mode="human", size=10)
+    env = GridWorldEnv(render_mode="human", size=25)
     obs, info = env.reset()
     done = False
     while not done:
         action = env.action_space.sample()
         action = get_action_from_keyboard_input()
         obs, reward, done, _, info = env.step(action)
-        print(f"Action: {action}, Obs: {obs}, Reward: {reward}, Info: {info}")
+        print(f"Action: {action}, Reward: {reward}, Info: {info}")
